@@ -12,7 +12,6 @@ const Dashboard: FC<DashboardProps> = () => {
     return ( 
         <Layout>
             <div>
-                <Button title="Add"/>
             </div>
         </Layout>
      );

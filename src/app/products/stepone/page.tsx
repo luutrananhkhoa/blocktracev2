@@ -17,7 +17,7 @@ const StepOne: FC<StepOneProps> = () => {
     return ( 
         <Layout>
             <div>
-                <Button title="Back to product" onClick={()=>setGoToProduct(true)}/>
+                <Button title="Back to product" className="btn-red" onClick={()=>setGoToProduct(true)}/>
             </div>
         </Layout>
      );

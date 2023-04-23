@@ -4,12 +4,13 @@ import { FC } from "react"
 type ButtonProps = {
   onClick?: () => void,
   title?: string,
-  type?: string
+  type?: string,
+  className?: string
 }
 
-const Button: FC<ButtonProps> = ({ onClick, title, type }) => {
+const Button: FC<ButtonProps> = ({ onClick, title, type, className }) => {
   return (
-    <button onClick={onClick} className="bg-[#9252FE] hover:bg-[#5F2EB1] text-white font-bold py-4 px-16 rounded">
+    <button onClick={onClick} className={className} type={type}>
       {title}
     </button>
   )

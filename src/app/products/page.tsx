@@ -12,8 +12,11 @@ const Products: FC<ProductsProps> = () => {
 
     return ( 
         <Layout>
-             <div>
-                <Button title="Add" onClick={() => router.push('/products/stepone')}/>
+             <div className="p-6">
+                <div>
+                    <h1>Product</h1>
+                </div>
+                <Button title="Add" className="btn-red" onClick={() => router.push('/products/stepone')}/>
             </div>
         </Layout>
      );

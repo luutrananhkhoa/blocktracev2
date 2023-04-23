@@ -17,11 +17,27 @@
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
+  color: #09003C;
   background: linear-gradient(
       to bottom,
       transparent,
       rgb(var(--background-end-rgb))
     )
     rgb(var(--background-start-rgb));
+}
+
+input{
+  @apply border-2;
+}
+
+.btn{
+  @apply bg-[#9252FE] hover:bg-[#5F2EB1] text-white font-bold py-6 px-16 rounded-[10px];
+}
+
+.btn-red{
+  @apply bg-[#FF1E5E] hover:bg-[#cf0f46] text-white font-bold py-6 px-16 rounded-[10px];
+}
+
+.btn-yellow{
+  @apply bg-[#FFD237] hover:bg-[#c9a31c] text-white font-bold py-6 px-16 rounded-[10px];
 }
