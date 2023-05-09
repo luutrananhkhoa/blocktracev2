@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { FC } from "react";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 
 interface SidebarProps {
     
@@ -10,12 +11,12 @@ interface SidebarProps {
 const Sidebar: FC<SidebarProps> = () => {
 
     const inactiveLink = 'flex items-center gap-2 p-2';
-    const activeLink = inactiveLink+ ' bg-white p-2 rounded-[30px] text-black';
+    const activeLink = inactiveLink+ ' bg-white p-3 rounded-[50px] text-black';
     const router = usePathname();
     return ( 
-        <aside className="text-white p-8 border-r-1 bg-[#9252FE]">
+        <aside className="text-white px-10 py-8 border-r-1 bg-[#9252FE]">
             <div className="flex items-center gap-1 mb-10">
-                <img src="/logo.svg" className="w-[64px] mr-4" alt="Logo" />
+                <Image src="/logo.svg" className="w-[64px] mr-4" width="64" height="48" alt="Logo" />
                 <p className="text-3xl font-bold text-white">BLOCKTRACE</p>
             </div>
             <nav className="flex flex-col gap-4">
