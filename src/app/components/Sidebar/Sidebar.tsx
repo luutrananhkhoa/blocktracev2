@@ -11,7 +11,7 @@ interface SidebarProps {
 const Sidebar: FC<SidebarProps> = () => {
 
     const inactiveLink = 'flex items-center gap-2 p-2';
-    const activeLink = inactiveLink+ ' bg-white p-3 rounded-[50px] text-black';
+    const activeLink = inactiveLink+ ' bg-white p-3 rounded-xl text-black';
     const router = usePathname();
     return ( 
         <aside className="text-white px-10 py-8 border-r-1 bg-[#9252FE]">
