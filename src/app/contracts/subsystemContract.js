@@ -1,12 +1,12 @@
 import Web3 from "web3";
 import detectEthereumProvider from "@metamask/detect-provider";
 
-export const ABI =[
+export const ABI = [
 	{
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "batchDatabaseContractAddress",
+				"name": "subsystemDatabaseContractAddress",
 				"type": "address"
 			}
 		],
@@ -35,52 +35,19 @@ export const ABI =[
 	{
 		"inputs": [
 			{
-				"internalType": "uint256",
-				"name": "userId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "teamId",
-				"type": "uint256"
-			},
-			{
 				"internalType": "string",
-				"name": "batchName",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "numOfProcess",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "categories",
+				"name": "typeOfSubsystem",
 				"type": "string"
 			},
 			{
 				"internalType": "string",
-				"name": "verifyCode",
+				"name": "registerDate",
 				"type": "string"
 			}
 		],
-		"name": "addBatch",
+		"name": "addSubsystem",
 		"outputs": [],
 		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "batchDatabase",
-		"outputs": [
-			{
-				"internalType": "contract BatchDatabase",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -92,52 +59,32 @@ export const ABI =[
 	},
 	{
 		"inputs": [],
-		"name": "getAllBatch",
+		"name": "getAllSubsystem",
 		"outputs": [
 			{
 				"components": [
 					{
 						"internalType": "uint256",
-						"name": "batchId",
+						"name": "subId",
 						"type": "uint256"
 					},
 					{
-						"internalType": "uint256",
-						"name": "userId",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "teamId",
-						"type": "uint256"
+						"internalType": "address",
+						"name": "userAddress",
+						"type": "address"
 					},
 					{
 						"internalType": "string",
-						"name": "batchName",
-						"type": "string"
-					},
-					{
-						"internalType": "uint256",
-						"name": "numOfProcess",
-						"type": "uint256"
-					},
-					{
-						"internalType": "string",
-						"name": "categories",
+						"name": "typeOfSystem",
 						"type": "string"
 					},
 					{
 						"internalType": "string",
-						"name": "verifyCode",
+						"name": "registerDate",
 						"type": "string"
-					},
-					{
-						"internalType": "bool",
-						"name": "batchIsChecked",
-						"type": "bool"
 					}
 				],
-				"internalType": "struct Batch[]",
+				"internalType": "struct Subsystem[]",
 				"name": "",
 				"type": "tuple[]"
 			}
@@ -159,6 +106,19 @@ export const ABI =[
 		"type": "function"
 	},
 	{
+		"inputs": [],
+		"name": "subsystemDatabase",
+		"outputs": [
+			{
+				"internalType": "contract SubsystemDatabase",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "address",
@@ -171,10 +131,10 @@ export const ABI =[
 		"stateMutability": "nonpayable",
 		"type": "function"
 	}
-]
-export const ADDRESS = "0x52f0A4277b670Af07EBdBd079EF50C1b666D0d87";
+] 
+export const ADDRESS = "0x498a1707d624Abe7d95590b3810309344C6B954c";
 
-export async function getBatchContract() {
+export async function getSubSystemContract() {
   const provider = await detectEthereumProvider();
   const web3 = new Web3(provider);
   return new web3.eth.Contract(ABI, ADDRESS);

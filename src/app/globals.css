@@ -31,13 +31,16 @@ input{
 }
 
 .btn{
-  @apply bg-[#9252FE] hover:bg-[#5F2EB1] text-white font-bold py-5 px-16 rounded-[10px];
+  @apply bg-[#726BDF] hover:bg-[#5853AF] text-white font-bold py-5 px-16 rounded-lg;
+}
+.btn-navy{
+  @apply bg-[#22252D] hover:bg-[#373B45] text-white font-bold py-5 px-16 rounded-lg;
 }
 
 .btn-red{
-  @apply bg-[#FF1E5E] hover:bg-[#cf0f46] text-white font-bold py-5 px-16 rounded-[10px];
+  @apply bg-[#FF1E5E] hover:bg-[#cf0f46] text-white font-bold py-5 px-16 rounded-lg;
 }
 
 .btn-yellow{
-  @apply bg-[#FFD237] hover:bg-[#c9a31c] text-white font-bold py-5 px-16 rounded-[10px];
+  @apply bg-[#fec652] hover:bg-[#f7b142] text-white font-bold py-5 px-16 rounded-lg;
 }

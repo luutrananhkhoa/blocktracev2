@@ -22,7 +22,7 @@ const AddProduct: FC<AddProductProps> = () => {
             <div className="w-full p-6">
                 <div className="flex justify-between">
                     <h1 className="text-4xl font-bold">Add Product</h1>
-                    <Button title="Cancel" className="btn-red" onClick={()=>setGoToProduct(true)}/>
+                    <Button title="Cancel" className="btn" onClick={()=>setGoToProduct(true)}/>
                 </div>
                 <div className="w-full min-h-[50vh] mt-10 flex flex-col items-center justify-center">
                     {isShowModal && 

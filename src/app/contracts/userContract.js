@@ -5,8 +5,96 @@ export const ABI = [
 	{
 		"inputs": [
 			{
+				"internalType": "address",
+				"name": "userDatabaseContractAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "ownerDatabaseContractAddress",
+				"type": "address"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "previousOwner",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "OwnershipTransferred",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "batchId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "productName",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "ownerName",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "dateTime",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "ownerEmail",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "ownerPhoneNumber",
+				"type": "string"
+			}
+		],
+		"name": "addOwner",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "string",
 				"name": "userName",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "userRole",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "userType",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "dateOfBirth",
 				"type": "string"
 			},
 			{
@@ -37,62 +125,69 @@ export const ABI = [
 	},
 	{
 		"inputs": [],
-		"name": "destroy",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "newOwner",
-				"type": "address"
-			}
-		],
-		"name": "transferOwnership",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "userDatabaseContractAddress",
-				"type": "address"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "constructor"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "previousOwner",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "newOwner",
-				"type": "address"
-			}
-		],
-		"name": "OwnershipTransferred",
-		"type": "event"
-	},
-	{
-		"inputs": [],
 		"name": "checkExistUser",
 		"outputs": [
 			{
 				"internalType": "bool",
 				"name": "",
 				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "destroy",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getAllOwner",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "uint256",
+						"name": "batchId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "productName",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "ownerName",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "dateTime",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "ownerEmail",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "ownerPhoneNumber",
+						"type": "string"
+					},
+					{
+						"internalType": "bool",
+						"name": "ownerIsChecked",
+						"type": "bool"
+					}
+				],
+				"internalType": "struct Product_Owner[]",
+				"name": "",
+				"type": "tuple[]"
 			}
 		],
 		"stateMutability": "view",
@@ -112,6 +207,21 @@ export const ABI = [
 					{
 						"internalType": "string",
 						"name": "userName",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "userRole",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "userType",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "dateOfBirth",
 						"type": "string"
 					},
 					{
@@ -165,6 +275,21 @@ export const ABI = [
 						"type": "string"
 					},
 					{
+						"internalType": "string",
+						"name": "userRole",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "userType",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "dateOfBirth",
+						"type": "string"
+					},
+					{
 						"internalType": "uint256",
 						"name": "userCccd",
 						"type": "uint256"
@@ -213,6 +338,32 @@ export const ABI = [
 	},
 	{
 		"inputs": [],
+		"name": "ownerDatabase",
+		"outputs": [
+			{
+				"internalType": "contract OwnerDatabase",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
 		"name": "userDatabase",
 		"outputs": [
 			{
@@ -225,7 +376,7 @@ export const ABI = [
 		"type": "function"
 	}
 ]
-export const ADDRESS = "0x56C7bbeD1957Bb193Cb7145D92D086B825D3D656";
+export const ADDRESS = "0xE93263E245D0023369f0715d1eeb09fE16e845aF";
 
 export async function getUserContract() {
   const provider = await detectEthereumProvider();

@@ -1,5 +1,5 @@
 'use client';
-import { FC, useState } from "react"
+import { FC, useEffect, useState } from "react"
 import Button from "./Button";
 import { useForm } from "react-hook-form";
 import {getBatchContract as getBatchContract} from "../contracts/batchContract";
@@ -12,10 +12,34 @@ type AddStepProps = {
 interface MultiStepsProps {
     stepNumber: number;
 }
+interface User {
+    dateofbirth : string | null,
+    useraddress : string | null,
+    usercccd : string | null,
+    useremail : string | null,
+    userid : string | null,
+    username : string | null,
+    userole: string | null,
+    userphone: string | null,
+    usertype : string | null,
+    teamid : string | null
+}
 
 const AddStep: FC<AddStepProps> = () => {
     const router = useRouter();
     const [stepNumberValue, setStepNumberValue] = useState('1')
+    const [dataUser, SetDataUser] = useState<User>({
+        dateofbirth: null,
+        useraddress: null,
+        usercccd: null,
+        useremail: null,
+        userid: null,
+        username: null,
+        userole: null,
+        userphone: null,
+        usertype: null,
+        teamid: null
+    })
     const { register, handleSubmit, watch, formState: { errors } } = useForm();
 
     const onSubmit = async (data : any ) => {
@@ -26,8 +50,7 @@ const AddStep: FC<AddStepProps> = () => {
         });
 
         getBatchContract().then((contract)=>{
-            contract.methods.addBatch(data.productname, Number(data.process), data.category)
-            // contract.methods.addUser(data.fullname, data.citizenId, data.dayofbirth, data.email, data.phone, teamId)
+            contract.methods.addBatch(dataUser.userid, dataUser.teamid, data.productname, Number(data.process), data.category)
             .send({from: accounts[0]})
             .then((res : any)=>{
                 console.log(res)
@@ -39,6 +62,15 @@ const AddStep: FC<AddStepProps> = () => {
             }).catch((err : any)=>{console.log(err)})
         })
     }
+    useEffect(()=>{
+        const storedData = localStorage.getItem('user_data');
+        if (storedData) {
+            const parsedData = JSON.parse(storedData);
+            console.log('user: ', parsedData)
+            SetDataUser(parsedData)
+        }
+
+    },[])
     return (
         <form 
             onSubmit={handleSubmit(onSubmit)}
@@ -70,21 +102,16 @@ const AddStep: FC<AddStepProps> = () => {
             </div>
             <div className="w-full flex justify-bee items-center">
                 <label htmlFor="category">Category:</label>
-                <select className="ml-4 my-8 px-4 py-4 border-solid border-gray border-2 rounded-xl flex-1" id="category" 
-                {...register("category", { required: true })}>
-                    <option value="Fruit">Fruit</option>
-                    <option value="Food">Food</option>
-                    <option value="Bevarage">Bevarage</option>
-                </select>
+                <input type="text" id="category" className="ml-4 px-4 py-4 rounded-[10px] flex-1" placeholder="Enter category" {...register("category", { required: true })}/>
             </div>
-            <Button title="Create" className="btn-yellow mt-10"/>
+            <Button title="Create" className="btn mt-10"/>
         </form>  
         )
 }
 
 export default AddStep
 
-const MultiStep: FC<MultiStepsProps> = ({stepNumber}) =>{
+export const MultiStep: FC<MultiStepsProps> = ({stepNumber}) =>{
     const steps = Array.from({ length: stepNumber }, (_, i) => i + 1);
     const classLastLi ='flex w-full justify-center items-center flex-1';
     const classNormalLi ="flex w-full justify-center items-center text-white dark:text-white after:content-[''] after:w-full after:h-1 after:border-b after:border-blue-100 after:border-4 after:inline-block dark:after:border-[#9252FE]";

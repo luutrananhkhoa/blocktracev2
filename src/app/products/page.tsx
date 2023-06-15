@@ -18,17 +18,37 @@ interface TableProductType {
     id: number,
     productName: string,
     category: string,
-    stepNumber: number
+    stepNumber: number,
+    userRole: string | null
+    
+}
+interface User {
+    dateofbirth : string | null,
+    useraddress : string | null,
+    usercccd : string | null,
+    useremail : string | null,
+    userid : string | null,
+    username : string | null,
+    userole: string | null,
+    userphone: string | null,
+    usertype : string,
+    teamid : string
 }
 const Products: FC<ProductsProps> = () => {
     const router = useRouter()
-    const Listproducts : TableProductType[] = [
-        { id: 1, productName: 'Product A', category: 'Category 1', stepNumber: 3 },
-        { id: 2, productName: 'Product B', category: 'Category 2', stepNumber: 2 },
-        { id: 3, productName: 'Product C', category: 'Category 1', stepNumber: 1 },
-        { id: 4, productName: 'Product D', category: 'Category 3', stepNumber: 4 },
-      ];
     const [listProduct, setListProduct] = useState<TableProductType[]>([])
+    const [dataUser, SetDataUser] = useState<User>({
+        dateofbirth: '',
+        useraddress: '',
+        usercccd: '',
+        useremail: '',
+        userid: '',
+        username: '',
+        userole: '',
+        userphone: '',
+        usertype: '',
+        teamid: ''
+    })
     const [listProductFilter, setListProductFilter] = useState<TableProductType[]>(listProduct)
 
     function filterProductsByKeyword(keyword: string): TableProductType[] {
@@ -58,41 +78,79 @@ const Products: FC<ProductsProps> = () => {
     }
 
     useEffect(()=>{
-         getBatchContract().then(async (contract) =>  {
+        const storedData = localStorage.getItem('user_data');
+        let userType = ''
+        let userTeamId = ''
+        let userId = ''
+        if (storedData) {
+            const parsedData = JSON.parse(storedData);
+            console.log('user: ', parsedData)
+            userType = parsedData.usertype 
+            userTeamId = parsedData.teamid 
+            userId = parsedData.userid 
+            SetDataUser(parsedData)
+        }
+
+        getBatchContract().then(async (contract) =>  {
             const accounts = await window.ethereum.request({
                 method: "eth_requestAccounts",
             });
-            contract.methods.getAllBatch().call({
+            await contract.methods.getAllBatch().call({
               from: accounts[0]
             })
-            .then((response : any)=>{
+            .then(async(response : any)=>{
                 console.log('List product:', response)
-                let arrayList : TableProductType[] = [];
-                response.map((product : any)=>{
-                    let item = {
-                        id: Number(product["batchId"]),
-                        productName: product["batchName"],
-                        category: product["categories"],
-                        stepNumber: Number(product["numOfProcess"])
+                console.log('userType:', userType)
+                console.log('userTeamId:', userTeamId)
+                let arrayList : TableProductType[] = []; 
+                await response.map((product : any)=>{
+                    if(userType.includes('Team')){
+                        console.log('Team')
+                        if(product.teamId.toString() === userTeamId.toString()){
+                            console.log('Save Team')
+                            let item = {
+                                id: Number(product["batchId"]),
+                                productName: product["batchName"],
+                                category: product["categories"],
+                                stepNumber: Number(product["numOfProcess"]),
+                                userRole: dataUser.userole
+                            }
+                            arrayList.push(item)
+                        }
+                    }else if(userType.includes('Personal')){
+                        console.log('Personal')
+                        if(product.userId.toString() === userId){
+                            console.log('Save Personal')
+                            let item = {
+                                id: Number(product["batchId"]),
+                                productName: product["batchName"],
+                                category: product["categories"],
+                                stepNumber: Number(product["numOfProcess"]),
+                                userRole: dataUser.userole
+                            }
+                            arrayList.push(item)
+                        }
                     }
-                    arrayList.push(item)
+                   
                 })
+                console.log('arrayList', arrayList)
                 setListProduct(arrayList)
                 setListProductFilter(arrayList)
             
             })
             .catch((err : any)=>{console.log(err);})
-          })
+        })  
+       
       },[])
     return ( 
         <Layout>
              <div className="p-6">
                 <div className="flex justify-between">
                     <h1 className="text-4xl font-bold">Product</h1>
-                    <Button title="Create" className="btn-red" onClick={() => router.push('/products/add')}/>
+                    <Button title="Create" className="btn" onClick={() => router.push('/products/add')}/>
                 </div>
                 <div className="mt-10">
-                    <div className="w-full px-6 py-5 flex items-center border-[1px] rounded-full bg-white mb-10  ">
+                    <div className="w-full px-6 py-5 flex items-center border-[1px] rounded-lg bg-white mb-10  ">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h- mr-4">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                         </svg>
@@ -136,10 +194,10 @@ const TableProduct: FC<TableProductProps>  = ({ products }) => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex flex-col">
-                            <div className="text-lg font-medium text-gray-900">
+                            <div className="text-lg text-gray-500">
                             {prd.category}
                             </div>
-                            <div className="text-lg text-gray-500">
+                            <div className="text-lg font-medium text-gray-900">
                             {prd.productName}
                             </div>
                         </div>
@@ -148,8 +206,8 @@ const TableProduct: FC<TableProductProps>  = ({ products }) => {
                         <div className="text-lg text-gray-900">{prd.stepNumber} steps</div>
                     </td>
                     <td className="flex gap-4 px-6 py-4">
-                        <Link href={`/products/${prd.id}/${prd.stepNumber}`} className="text-lg px-10 py-4 rounded-full text-white font-semibold bg-[#FFD237] cursor-pointer">Edit</Link>
-                        <Link href={`/batchdetails/${prd.id}`} className="text-lg px-10 py-4 rounded-full text-white font-semibold bg-green-400 cursor-pointer">View</Link>
+                        {prd.userRole === '0'? <></>:<Link href={`/products/${prd.id}/${prd.stepNumber}`} className="text-lg px-10 py-4 rounded-lg text-white font-semibold bg-[#726BDF] cursor-pointer">Edit</Link>}
+                        <Link href={`/batchdetails/${prd.id}`} className="text-lg px-10 py-4 rounded-lg text-white font-semibold bg-[#22252D] cursor-pointer">View</Link>
                     </td>
                 </tr>
             })}
