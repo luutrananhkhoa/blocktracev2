@@ -9,14 +9,10 @@ import {getProcessingContract as getProcessingContract} from "../../contracts/pr
 import Button from "@/app/components/Button";
 import { getBatchContract } from "@/app/contracts/batchContract";
 import QRCode from "qrcode.react";
+import SidebarCustomer from "@/app/components/SidebarCustomer";
 
-interface BatchDetailsProps {
+interface BatchDetailCustomerProps {
     
-}
-
-interface QRCodeProps {
-    qrValue: string
-    setIsShowQrCode: any
 }
 
 interface DataStep {
@@ -28,12 +24,10 @@ interface DataStep {
     categories: string
 }
 
-const BatchDetails: FC<BatchDetailsProps> = () => {
+const BatchDetailCustomer: FC<BatchDetailCustomerProps> = () => {
     const router = useRouter();
     const params = useParams();
     const [BatchIdValue, setBatchIdValue] = useState(0)
-    const [VerifyValue, setVerifyValue] = useState('')
-    const [isShowQrCode, setIsShowQrCode] = useState(false)
     const [numberOfStep, setNumberOfStep] = useState('')
     const [stepComplete, setStepComplete] = useState(0)
     const [dataStep1, setDataStep1] = useState<DataStep>({
@@ -95,7 +89,6 @@ const BatchDetails: FC<BatchDetailsProps> = () => {
                 const filteredArrFinal = filteredArr[0]
                 if(filteredArrFinal.length > 0){
                     setNumberOfStep(filteredArrFinal["numOfProcess"])
-                    setVerifyValue(filteredArrFinal["verifyCode"])
                 }
             })
             .catch((err : any)=>{console.log(err);})
@@ -198,8 +191,8 @@ const BatchDetails: FC<BatchDetailsProps> = () => {
             .catch((err : any)=>{console.log(err);})
           })
 
-          getProcessingContract().then(async(contract) =>{
-            await  contract.methods.getAllStep5().call({
+          getProcessingContract().then( async (contract) =>{
+            await contract.methods.getAllStep5().call({
               from: accounts[0]
             })
             .then((response : any)=>{
@@ -224,8 +217,9 @@ const BatchDetails: FC<BatchDetailsProps> = () => {
     },[])
 
     return ( 
-        <Layout>
-            <div className="p-6">
+        <div className="min-h-screen flex">
+            <SidebarCustomer />
+            <div className="p-6 w-full min-h-screen bg-[#f8f8fa]">
                 <div className="flex items-center gap-3">
                     <div onClick={()=> router.back()}>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-9 h-9 text-[#FFD237] cursor-pointer">
@@ -238,10 +232,7 @@ const BatchDetails: FC<BatchDetailsProps> = () => {
                     <h1 className="text-6xl font-bold">Tracking</h1>
                     <p className="font-semibold text-gray-600">{numberOfStep} Steps - {stepComplete} Complete</p>
                 </div>
-                {isShowQrCode? 
-                    <QRCodeComp qrValue={VerifyValue.toString()} setIsShowQrCode={setIsShowQrCode} /> 
-                    :
-                    <div className="w-full flex items-center justify-center">
+                <div className="w-full flex items-center justify-center">
                     {stepComplete === 0?
                         <div className="w-[60%] p-10 mt-12 flex flex-col items-center gap-4">
                             <Image src="/noproduct.png" className="w-[60%]" width="800" height="800" alt="Logo" />
@@ -433,58 +424,13 @@ const BatchDetails: FC<BatchDetailsProps> = () => {
                             </div>
                         </div>
                     }
-
-                    {Number(numberOfStep) === stepComplete && 
-                        <div className="bg-[#726BDF] p-6 mt-[3rem] text-center font-semibold text-white rounded-lg cursor-pointer"
-                            onClick={()=>setIsShowQrCode(true)}>
-                            Publish
-                        </div>}
                         
                     </div>}
-                    </div>
-                }
+                </div>
             </div>
-        </Layout>
+        </div>
 
      );
 }
  
-export default BatchDetails;
-
-const QRCodeComp: FC<QRCodeProps>  = ({qrValue, setIsShowQrCode}) =>{
-
-    const downloadQRCode = () => {
-        // Generate download with use canvas and stream
-        const canvas = document.getElementById("qr-gen");
-        const pngUrl = canvas && canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
-        let downloadLink = document.createElement("a");
-        downloadLink.href = pngUrl;
-        downloadLink.download = 'QRCode.png';
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-    };
-
-    return(
-        <div className="flex flex-col mt-10 justify-center items-center">
-            <QRCode
-                id="qr-gen"
-                className="none"
-                value={qrValue}
-                size={390}
-                level={"H"}
-                includeMargin={true}
-            />
-            <div className="flex gap-4">
-                <div className="bg-[#22252D] py-6 px-10 mt-[3rem] text-center font-semibold text-white rounded-lg cursor-pointer"
-                    onClick={()=>setIsShowQrCode(false)}>
-                    Cancel
-                </div>
-                <div className="bg-[#726BDF] py-6 px-10 mt-[3rem] text-center font-semibold text-white rounded-lg cursor-pointer"
-                    onClick={()=>downloadQRCode()}>
-                    Download
-                </div>
-            </div>
-        </div>   
-    ) 
-}
+export default BatchDetailCustomer;

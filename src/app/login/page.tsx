@@ -1,5 +1,5 @@
 'use client';
-import { FC, useState } from "react";
+import { FC, useCallback, useState } from "react";
 import Button from "../components/Button";
 import { useRouter } from 'next/navigation'
 import Link from "next/link";
@@ -38,8 +38,8 @@ const Login: FC<LoginProps> = () => {
             console.log(accounts[0])
             setAddressWallet(accounts[0])
 
-            await getUserContract().then((contract) =>{
-                contract.methods.getAllUser().call({
+            await getUserContract().then(async(contract) =>{
+                await contract.methods.getAllUser().call({
                   from: addressWallet
                 })
                 .then(async(response : any)=>{
@@ -57,13 +57,14 @@ const Login: FC<LoginProps> = () => {
                         setValidateLogin(false)
                     }else{
                         toast.success('Welcome to Block Trace!')
-
+                        console.log('4', flag)
                         const userDataStorage = localStorage.getItem('user_data');
                         if(userDataStorage){
                             localStorage.removeItem('user_data');
                         }
+
                         response.forEach((user:any)=>{
-                            if(user['userAddress'].toLowerCase() === addressWallet.toLowerCase()){
+                            if(user['userAddress'].toLowerCase() === accounts[0].toLowerCase()){
                                 let userData ={
                                     userid: user['userId'],
                                     username: user['userName'],
@@ -76,16 +77,16 @@ const Login: FC<LoginProps> = () => {
                                     usertype: user['userType'], 
                                     teamid: user['teamId'], 
                                 }
+                                console.log('userData', userData)
                                 localStorage.setItem('user_data', JSON.stringify(userData));
                             }
                         })
-
+                        setValidateLogin(true)
                         const status : string | null = localStorage.getItem('isLogin') || null;
                         if(status){
                             dispatch<any>(login({ isLogin: status }));
                         }
 
-                        setValidateLogin(true)
                     }
                 })
                 .catch((err : any)=>{console.log(err);})

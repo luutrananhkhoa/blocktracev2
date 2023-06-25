@@ -96,7 +96,7 @@ const CustomerProduct: FC<CustomerProductProps> = () => {
       const accounts = await window.ethereum.request({
           method: "eth_requestAccounts",
       });
-      contract.methods.getAllOwner().call({
+      await contract.methods.getAllOwner().call({
         from: accounts[0]
       })
       .then((response : any)=>{
@@ -210,7 +210,7 @@ const TableProduct: FC<TableProductProps>  = ({ products }) => {
                       <div className="text-lg text-gray-900">{prd.dateTime}</div>
                   </td>
                   <td className="flex gap-4 px-6 py-4">
-                      <Link href={`/batchdetails/${prd.id}`} className="text-lg px-10 py-4 rounded-xl text-white font-semibold bg-green-400 cursor-pointer">View</Link>
+                      <Link href={`/batchdetailcustomer/${prd.id}`} className="text-lg px-10 py-4 rounded-xl text-white font-semibold bg-green-400 cursor-pointer">View</Link>
                   </td>
               </tr>
           })}

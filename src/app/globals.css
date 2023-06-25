@@ -31,7 +31,7 @@ input{
 }
 
 .btn{
-  @apply bg-[#726BDF] hover:bg-[#5853AF] text-white font-bold py-5 px-16 rounded-lg;
+  @apply bg-[#726BDF] hover:transition-all hover:bg-[#5853AF] text-white font-bold py-5 px-16 rounded-lg;
 }
 .btn-navy{
   @apply bg-[#22252D] hover:bg-[#373B45] text-white font-bold py-5 px-16 rounded-lg;

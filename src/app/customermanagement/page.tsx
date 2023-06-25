@@ -1,5 +1,5 @@
 'use client';
-import { FC, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import Button from "../components/Button";
 import { useRouter } from 'next/navigation'
 import Link from "next/link";
@@ -37,44 +37,44 @@ const CustomerManagement: FC<CustomerManagementProps> = () => {
       router.push('/customerproduct');
     }
 
-    const onSubmit = (data : any ) => {
-         console.log(data)
+    const onSubmit = async (data : any ) => {
+      console.log(data)
 
-         getUserContract().then((contract) =>{
-            contract.methods.getAllUser().call({
-              from: addressWallet
-            })
-            .then((response : any)=>{
-               console.log('List user:', response)
-               setListUsers(response)
-            })
-            .catch((err : any)=>{console.log(err);})
-          })
+      await getUserContract().then(async(contract) =>{
+        await contract.methods.getAllUser().call({
+           from: addressWallet
+         })
+         .then((response : any)=>{
+            console.log('List user:', response)
+            setListUsers(response)
+         })
+         .catch((err : any)=>{console.log(err);})
+       })
 
-          let isMember = listUsers && listUsers.some(item => {
-            let i : string = item['userAddress'];
-            return i.toLowerCase() === addressWallet.toLowerCase();
-            
-         });
+       let isMember = listUsers && listUsers.some(item => {
+         let i : string = item['userAddress'];
+         return i.toLowerCase() === addressWallet.toLowerCase();
+         
+      });
 
-         if(isMember){
-            console.log('isMember 2')
-            toast.error("Account already exists")
-         }else{
-            getUserContract().then((contract)=>{
-               contract.methods.addUser(data.fullname, 0, 'Customer' , data.dayofbirth, data.citizenId, data.email, data.phone, 0)
-               .send({from: addressWallet})
-               .then((res : any)=>{
-                   console.log(res)
-                   if(res.status){
-                       console.log('status: ', res.status)
-                       toast.success('Successfully register');
-                     //   router.push('/login');
-                   }
-               }).catch((err : any)=>{console.log(err)})
-           })
-         }
-   }
+      if(isMember){
+         console.log('isMember 2')
+         toast.error("Account already exists")
+      }else{
+         getUserContract().then((contract)=>{
+            contract.methods.addUser(data.fullname, 0, 'Customer' , data.dayofbirth, data.citizenId, data.email, data.phone, 0)
+            .send({from: addressWallet})
+            .then((res : any)=>{
+                console.log(res)
+                if(res.status){
+                    console.log('status: ', res.status)
+                    toast.success('Successfully register');
+                  //   router.push('/login');
+                }
+            }).catch((err : any)=>{console.log(err)})
+        })
+      }
+}
 
     return ( 
         <div className="min-h-screen flex">

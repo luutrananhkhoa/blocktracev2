@@ -1,5 +1,5 @@
 'use client';
-import { FC, useEffect, useState } from "react"
+import { FC, useCallback, useEffect, useState } from "react"
 import Button from "./Button";
 import { useForm } from "react-hook-form";
 import {getBatchContract as getBatchContract} from "../contracts/batchContract";
@@ -42,15 +42,25 @@ const AddStep: FC<AddStepProps> = () => {
     })
     const { register, handleSubmit, watch, formState: { errors } } = useForm();
 
+    const generateVerificationCode = useCallback(() => {
+        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        var code = '';
+        for (var i = 0; i < 8; i++) {
+          code += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        return code;
+      },[])
+ 
     const onSubmit = async (data : any ) => {
         console.log('data: ', data)
-
         const accounts = await window.ethereum.request({
             method: "eth_requestAccounts",
         });
 
-        getBatchContract().then((contract)=>{
-            contract.methods.addBatch(dataUser.userid, dataUser.teamid, data.productname, Number(data.process), data.category)
+        let verificationCode = generateVerificationCode();
+        console.log('verificationCode', verificationCode)
+        getBatchContract().then(async(contract)=>{
+            await contract.methods.addBatch(dataUser.userid, dataUser.teamid, data.productname, Number(data.process), data.category, verificationCode)
             .send({from: accounts[0]})
             .then((res : any)=>{
                 console.log(res)
@@ -76,7 +86,7 @@ const AddStep: FC<AddStepProps> = () => {
             onSubmit={handleSubmit(onSubmit)}
             className="h-full w-[60%] p-10 rounded-xl mt-10 flex flex-col items-center justify-center shadow-lg bg-white">
             <Toaster />
-            <h2 className="text-3xl font-bold mb-8">Process</h2>
+            <h2 className="text-3xl font-bold mb-8">Add a Product</h2>
             <MultiStep stepNumber={Number(stepNumberValue)} />
             <div className="w-full flex flex-col justify-center mt-10">
                 <div className="flex items-center">

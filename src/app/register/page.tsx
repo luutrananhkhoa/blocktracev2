@@ -144,9 +144,9 @@ const Register: FC<RegisterProps> = () => {
                             <p>Already a member?</p><Link href={'/login'} className="text-[#8346FF] font-bold ml-2"> Log In</Link>
                         </div>
                         <div className="flex gap-2 text-white">
-                            <div className={`px-6 py-4 rounded-sm cursor-pointer ${isPersonalForm? 'bg-[#726BDF]': 'bg-[#fec652]'}`}
+                            <div className={`px-6 py-4 rounded-sm cursor-pointer ${isPersonalForm? 'bg-[#726BDF] border-4 border-[#fb73b3]': 'bg-[#fec652]'}`}
                                 onClick={()=>{setIsPersonalForm(true)}}>Personal Account</div>
-                            <div className={`px-6 py-4 rounded-sm cursor-pointer ${!isPersonalForm? 'bg-[#726BDF]': 'bg-[#fec652]'}`}
+                            <div className={`px-6 py-4 rounded-sm cursor-pointer ${!isPersonalForm? 'bg-[#726BDF] border-4 border-[#fb73b3]': 'bg-[#fec652]'}`}
                                 onClick={()=>{setIsPersonalForm(false)}}>Team Account</div>
                         </div>
                     </div>

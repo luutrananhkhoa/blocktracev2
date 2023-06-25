@@ -1,5 +1,5 @@
 'use client';
-import { FC, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import Button from "../components/Button";
 import { useRouter } from 'next/navigation'
 import Link from "next/link";
@@ -19,7 +19,7 @@ const CustomerLogin: FC<CustomerLoginProps> = () => {
     const [addressWallet, setAddressWallet] = useState<string>('')
     const { register, handleSubmit, watch, formState: { errors } } = useForm();
 
-    const onHandleConnect = async ()=>{
+   const onHandleConnect =  async()=>{
       const accounts = await window.ethereum.request({
         method: "eth_requestAccounts",
       });
@@ -84,45 +84,45 @@ const CustomerLogin: FC<CustomerLoginProps> = () => {
     })
   }
 
-   const onSubmit = (data : any ) => {
-         console.log(data)
-         let listUsersData : any= []
-         getUserContract().then((contract) =>{
-            contract.methods.getAllUser().call({
-              from: addressWallet
-            })
-            .then((response : any)=>{
-               console.log('List user:', response)
-               listUsersData = response
-               setListUsers(response)
-            })
-            .catch((err : any)=>{console.log(err);})
-          })
-        
-         //  const filteredArray = listUsersData.filter((item : any) => item["userType"] === 'Customer');
+   const onSubmit = async (data : any ) => {
+      console.log(data)
+      let listUsersData : any= []
+      await getUserContract().then( async (contract) =>{
+         await contract.methods.getAllUser().call({
+           from: addressWallet
+         })
+         .then((response : any)=>{
+            console.log('List user:', response)
+            listUsersData = response
+            setListUsers(response)
+         })
+         .catch((err : any)=>{console.log(err);})
+       })
+     
+      //  const filteredArray = listUsersData.filter((item : any) => item["userType"] === 'Customer');
 
-          let isMember = listUsersData && listUsersData.some((item : any) => {
-            let i : string = item['userAddress'];
-            return i.toLowerCase() === addressWallet.toLowerCase();
-            
-         });
+       let isMember = listUsersData && listUsersData.some((item : any) => {
+         let i : string = item['userAddress'];
+         return i.toLowerCase() === addressWallet.toLowerCase();
+         
+      });
 
-         if(isMember){
-            toast.error("Account already exists")
-         }else{
-            getUserContract().then((contract)=>{
-               contract.methods.addUser(data.fullname, 0, 'Customer' , data.dayofbirth, data.citizenId, data.email, data.phone, 0)
-               .send({from: addressWallet})
-               .then((res : any)=>{
-                   console.log(res)
-                   if(res.status){
-                       console.log('status: ', res.status)
-                       toast.success('Successfully register');
-                     //   router.push('/login');
-                   }
-               }).catch((err : any)=>{console.log(err)})
-           })
-         }
+      if(isMember){
+         toast.error("Account already exists")
+      }else{
+         getUserContract().then((contract)=>{
+            contract.methods.addUser(data.fullname, 0, 'Customer' , data.dayofbirth, data.citizenId, data.email, data.phone, 0)
+            .send({from: addressWallet})
+            .then((res : any)=>{
+                console.log(res)
+                if(res.status){
+                    console.log('status: ', res.status)
+                    toast.success('Successfully register');
+                  //   router.push('/login');
+                }
+            }).catch((err : any)=>{console.log(err)})
+        })
+      }
    }
 
     return ( 

@@ -1,5 +1,5 @@
 'use client';
-import { FC, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import Button from "../components/Button";
 import { useRouter } from 'next/navigation';
@@ -51,17 +51,16 @@ const Products: FC<ProductsProps> = () => {
     })
     const [listProductFilter, setListProductFilter] = useState<TableProductType[]>(listProduct)
 
-    function filterProductsByKeyword(keyword: string): TableProductType[] {
+    const filterProductsByKeyword = (keyword: string): TableProductType[] => {
         const filteredProducts = listProduct.filter((product) => {
             return (
                 product.productName.toLowerCase().includes(keyword.toLowerCase())
             );
         });
-        
         return filteredProducts;
     }
 
-    const onChangeFilter = (keywordFilter: string) =>{
+    const onChangeFilter =  (keywordFilter: string) =>{
         const arrayFilter = filterProductsByKeyword(keywordFilter)
         const element = document.querySelector('#noProductFilter') as HTMLDivElement;
         if(arrayFilter.length === 0){
@@ -147,7 +146,9 @@ const Products: FC<ProductsProps> = () => {
              <div className="p-6">
                 <div className="flex justify-between">
                     <h1 className="text-4xl font-bold">Product</h1>
-                    <Button title="Create" className="btn" onClick={() => router.push('/products/add')}/>
+                    {dataUser.userole === '0' || dataUser.usertype === 'Personal' &&
+                        <Button title="Create" className="btn" onClick={() => router.push('/products/add')}/>
+                    }
                 </div>
                 <div className="mt-10">
                     <div className="w-full px-6 py-5 flex items-center border-[1px] rounded-lg bg-white mb-10  ">

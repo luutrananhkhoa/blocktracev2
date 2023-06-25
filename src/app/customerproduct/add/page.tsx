@@ -39,14 +39,15 @@ interface Batch {
 const AddProductOwner: FC<AddProductOwnerProps> = () => {
     const router = useRouter()
     const [codeValue, setCodeValue] = useState<string>('')
-    const [verifyCode, setVerifyCode] = useState<string>('')
-    const [verifyCodInput, setVerifyCodeInput] = useState<string>('')
+    const [veriCode, setVeriCode] = useState<string>('')
+    const [verifyCodeInput, setVerifyCodeInput] = useState<string>('')
     const [currentDate, setCurrentDate] = useState<string>('')
     const [listAllProducts, setListAllProducts] = useState([])
     const [listAllOwner, setListAllOwner] = useState([])
     const [isAdd, setIsAdd] = useState(false)
     const [isSendGmail, setIsSendGmail] = useState(false)
     const [isShowInfo, setIsShowInfo] = useState(false)
+    const [isShowVerify, setIsShowVerify] = useState(false)
     const [dataUser, SetDataUser] = useState<User>({
         dateofbirth: null,
         useraddress: null,
@@ -67,7 +68,7 @@ const AddProductOwner: FC<AddProductOwnerProps> = () => {
     })
 
     const onCheckVerify = () =>{
-        if(verifyCode === verifyCodInput){
+        if(codeValue === verifyCodeInput){
             setIsAdd(true)
             toast.success('Confirmation Successful!')
         }else{
@@ -80,7 +81,6 @@ const AddProductOwner: FC<AddProductOwnerProps> = () => {
         const min = 10000000;
         const max = 99999999;
         const veriCode = Math.floor(Math.random() * (max - min + 1)) + min;
-        setVerifyCode(veriCode.toString())
 
         const templateParams = {
             from_email : 'BLOCKTRACE',
@@ -95,6 +95,9 @@ const AddProductOwner: FC<AddProductOwnerProps> = () => {
             }, (err) => {
                console.log('FAILED...', err);
             });
+
+        setCodeValue(veriCode.toString())
+        setIsShowVerify(true)
     }
 
     //Get current Date
@@ -113,15 +116,21 @@ const AddProductOwner: FC<AddProductOwnerProps> = () => {
     const onCheck = async () =>{
         let flag = false
         let flagOwner = false
+        let batchId = ''
 
-        listAllProducts.map((product)=>{
-          if(product["batchId"] === codeValue){
+        await listAllProducts.forEach((product)=>{
+            console.log('1')
+          if(product["verifyCode"] === veriCode){
             flag = true
+            console.log('1 true')
+            batchId = product["batchId"]
           }
         })
-
-        listAllOwner.map((product : any)=>{    
-            if(product["batchId"] ===  codeValue){
+        console.log('batchId', batchId)
+        await listAllOwner.forEach((product : any)=>{    
+            console.log('2')
+            if(product["batchId"] ===  batchId){
+                console.log('Is owner true')
                 flagOwner = true
             }
         })
@@ -146,7 +155,7 @@ const AddProductOwner: FC<AddProductOwnerProps> = () => {
     }
 
     //Add info after checking
-    const handleAddInfo = () =>{
+    const handleAddInfo = async () =>{
         const customerDataStorage = localStorage.getItem('customer_data');
         const currentDate = CurrentDate().toString();
         setCurrentDate(currentDate)
@@ -158,8 +167,11 @@ const AddProductOwner: FC<AddProductOwnerProps> = () => {
             toast.error("Customer's data not found")
         }
 
-        listAllProducts.map((product)=>{
-            if(product["batchId"] === codeValue){
+        await listAllProducts.map((product)=>{
+            console.log('product["verifyCode"]: ', product["verifyCode"])
+            console.log('veriCode ', veriCode)
+
+            if(product["verifyCode"] === veriCode){
                 console.log('product: ', product)
                 let item ={
                     batchId: product["batchId"],
@@ -167,6 +179,7 @@ const AddProductOwner: FC<AddProductOwnerProps> = () => {
                     categories: product["categories"],
                     numOfProcess: product["numOfProcess"],
                 }
+                console.log('item: ', item)
                 SetDataUBatch(item)
             }
         })
@@ -201,7 +214,7 @@ const AddProductOwner: FC<AddProductOwnerProps> = () => {
           const accounts = await window.ethereum.request({
               method: "eth_requestAccounts",
           });
-          contract.methods.getAllBatch().call({
+          await contract.methods.getAllBatch().call({
             from: accounts[0]
           })
           .then((response : any)=>{
@@ -217,7 +230,7 @@ const AddProductOwner: FC<AddProductOwnerProps> = () => {
             const accounts = await window.ethereum.request({
                 method: "eth_requestAccounts",
             });
-            contract.methods.getAllOwner().call({
+            await contract.methods.getAllOwner().call({
               from: accounts[0]
             })
             .then((response : any)=>{
@@ -255,7 +268,7 @@ const AddProductOwner: FC<AddProductOwnerProps> = () => {
                         <div className="bg-white p-4 flex-4">
                             <h2 className="text-xl mb-4 font-bold">Check Product</h2>
                             <div className="flex gap-4">
-                                <input type="text" className="px-6 py-4 border-[1px] outline-none" placeholder="Enter code" onChange={(e)=>setCodeValue(e.target.value)}/>
+                                <input type="text" className="px-6 py-4 border-[1px] outline-none" placeholder="Enter code" onChange={(e)=>setVeriCode(e.target.value)}/>
                                 <div className="btn" onClick={onCheck}>
                                     Check
                                 </div>
@@ -264,14 +277,19 @@ const AddProductOwner: FC<AddProductOwnerProps> = () => {
                                 <div className="btn mt-10 text-center cursor-pointer" onClick={sendEmail}>
                                 Send
                             </div>}
-
-                            <h2 className="text-xl mb-4 mt-4 font-bold">Verification code:</h2>
-                            <div className="flex gap-4">
-                                <input type="text" className="px-6 py-4 border-[1px] outline-none" placeholder="Enter code" onChange={(e)=>setVerifyCodeInput(e.target.value)}/>
-                                <div className="btn-red cursor-pointer" onClick={onCheckVerify}>
-                                    OK
+                            
+                            {isShowVerify &&
+                            <>
+                                <h2 className="text-xl mb-4 mt-4 font-bold">Verification code:</h2>
+                                <div className="flex gap-4">
+                                    <input type="text" className="px-6 py-4 border-[1px] outline-none" placeholder="Enter code" onChange={(e)=>setVerifyCodeInput(e.target.value)}/>
+                                    <div className="btn-red cursor-pointer" onClick={onCheckVerify}>
+                                        OK
+                                    </div>
                                 </div>
-                            </div>
+                            </>
+                            }
+                            
                             {isAdd &&  
                                 <div className="btn-yellow mt-10 text-center cursor-pointer" onClick={handleAddInfo}>
                                     Add

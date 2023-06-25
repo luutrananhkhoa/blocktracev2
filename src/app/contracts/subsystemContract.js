@@ -5,6 +5,31 @@ export const ABI = [
 	{
 		"inputs": [
 			{
+				"internalType": "string",
+				"name": "typeOfSubsystem",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "registerDate",
+				"type": "string"
+			}
+		],
+		"name": "addSubsystem",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "destroy",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "address",
 				"name": "subsystemDatabaseContractAddress",
 				"type": "address"
@@ -35,24 +60,12 @@ export const ABI = [
 	{
 		"inputs": [
 			{
-				"internalType": "string",
-				"name": "typeOfSubsystem",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "registerDate",
-				"type": "string"
+				"internalType": "address",
+				"name": "newOwner",
+				"type": "address"
 			}
 		],
-		"name": "addSubsystem",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "destroy",
+		"name": "transferOwnership",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -117,22 +130,9 @@ export const ABI = [
 		],
 		"stateMutability": "view",
 		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "newOwner",
-				"type": "address"
-			}
-		],
-		"name": "transferOwnership",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
 	}
-] 
-export const ADDRESS = "0x498a1707d624Abe7d95590b3810309344C6B954c";
+]
+export const ADDRESS = "0xF56fccFFcdbB055e807f0FA09F20FBA473f7E5a5";
 
 export async function getSubSystemContract() {
   const provider = await detectEthereumProvider();

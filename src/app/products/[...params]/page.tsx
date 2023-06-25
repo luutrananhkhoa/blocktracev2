@@ -1,5 +1,5 @@
 'use client';
-import { FC, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import { useRouter, useParams } from 'next/navigation'
 import Link from "next/link";
 import Image from "next/image";
@@ -10,6 +10,7 @@ import Layout from "../../components/Layout";
 import { useForm } from "react-hook-form";
 import { Router } from "next/router";
 import { getBatchContract } from "@/app/contracts/batchContract";
+import { getSubSystemContract } from "@/app/contracts/subsystemContract";
 
 interface ProductDetailProps {
     
@@ -33,16 +34,80 @@ const ProductDetail: FC<ProductDetailProps> = () => {
     const params = useParams();
     const [stepNumberValue, setStepNumberValue] = useState(0)
     const [isShowForm, setIsShowForm] = useState(false)
+    const [fileType, setFileType] = useState('')
+    const [fileName, setFileName] = useState('')
     const [stepNumberId, setStepNumberId] = useState(1)
     const [batchNameValue, setBatchNameValue] = useState('')
     const [categoryValue, setCategoryValue] = useState('')
     const [isArrayShow, setIsArrayShow] = useState([])
+    const [isUpgrade, setIsUpgrade] = useState(false)
+    const [timeValidPremium, setTimeValidPremium] = useState(0)
+    const [isShowUpgrade, setIsShowUpgrade] = useState(false)
 
+    const [isRole, setIsRole] = useState('')
+
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [responseImage, setResponseImage] = useState('');
+    const [videoUrl, setVideoUrl] = useState('');
+
+    const handleFileSelect = (event:any) => {
+        setSelectedFile(event.target.files[0]);
+        const fileType = event.target.files[0] && event.target.files[0].type;
+        const fileName = event.target.files[0] && event.target.files[0].name;
+        console.log('File type:', fileType);
+        if(fileType && fileType.includes('image')){
+            setFileType('image')
+            setFileName(fileName)
+        }else if(fileType && fileType.includes('video')){
+            setFileType('video')
+            setFileName(fileName)
+        }
+    };
+
+    const handleUpload = async(type:string) => {
+        // console.log('selectedFile',selectedFile)
+        if (selectedFile) {
+            console.log('selectedFile',selectedFile)
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            await fetch(`http://172.16.0.15:6868/${type ==="img"?"upload":"uploadvideo"}`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    Accept: 'application/json',
+                },
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log('The value is:', data);
+                if(type ==="img"){
+                    setResponseImage(data.value)
+                }else{
+                    console.log('Go 1:', data.value);
+                    setVideoUrl(data.value)
+        
+                }
+                // Further processing or handling of the response value
+              })
+            .catch((error) => {
+                toast.error("An error has occurred")
+                console.error('Error:', error);
+            });
+        }
+    }
     useEffect(()=>{
         let batchId = params.params.split('/')[0];
         let stepNumber = params.params.split('/')[1];
         setStepNumberValue(Number(stepNumber))
-
+        const storedData = localStorage.getItem('user_data');
+        if (storedData) {
+            const parsedData = JSON.parse(storedData);
+            console.log('user: ', parsedData)
+            if(parsedData.usertype === "Team" && parsedData.userole !=="0"){
+                setIsRole(parsedData.userole);
+            }
+        }
         getBatchContract().then(async (contract) =>  {
             const accounts = await window.ethereum.request({
                 method: "eth_requestAccounts",
@@ -53,7 +118,7 @@ const ProductDetail: FC<ProductDetailProps> = () => {
             .then(async(response : any)=>{
                 await response.map((product : any)=>{
                     if(product["batchId"] === batchId){
-                        console.log('Product OK:', product)
+                        // console.log('Product OK:', product)
                         setBatchNameValue(product["batchName"])
                         setCategoryValue(product["categories"])
                     }
@@ -67,6 +132,11 @@ const ProductDetail: FC<ProductDetailProps> = () => {
                     const addStepFunction = stepNumberId === 0 ? contract.methods.getAllStep1 :
                                             stepNumberId === 1 ? contract.methods.getAllStep2 :
                                             stepNumberId === 2 ? contract.methods.getAllStep3 :
+                                            stepNumberId === 3 ? contract.methods.getAllStep4 :
+                                            stepNumberId === 4 ? contract.methods.getAllStep5 :
+                                            stepNumberId === 5 ? contract.methods.getAllStep6 :
+                                            stepNumberId === 6 ? contract.methods.getAllStep7 :
+                                            stepNumberId === 7 ? contract.methods.getAllStep8 :
                                             null;
     
                     if (addStepFunction) {
@@ -94,9 +164,34 @@ const ProductDetail: FC<ProductDetailProps> = () => {
             console.log('arrayShow', arrayShow)
             setIsArrayShow(arrayShow)
         })
-
-       
         
+        getSubSystemContract().then(async (contract) =>  {
+            const accounts = await window.ethereum.request({
+                method: "eth_requestAccounts",
+            });
+            await contract.methods.getAllSubsystem().call({
+              from: accounts[0]
+            })
+            .then(async(response : any)=>{
+                if(response && response.length > 0){
+                    await response.forEach((item : any)=>{
+                        if(accounts[0].toLowerCase() === item["userAddress"].toLowerCase()){
+                            let now = new Date();
+                            let nowDatetime= now.getTime();
+                            let isLicense = nowDatetime - (Number(item["registerDate"])+ 7 * 24 * 60 * 60 * 1000)>0 ? false : true;
+                            if(isLicense){
+                                setIsUpgrade(true)
+                                setTimeValidPremium(Number(item["registerDate"]))
+                            }else{
+                                setIsUpgrade(false)
+                            }
+                            console.log('isLicense', isLicense)
+                        }
+                    })
+                }
+            })
+            .catch((err : any)=>{console.log(err);})
+        }) 
     },[])
 
     const handleHideForm = () =>{
@@ -104,6 +199,7 @@ const ProductDetail: FC<ProductDetailProps> = () => {
     }
     return ( 
         <Layout>
+            <Toaster />
              <div className="p-6">
                 <div className="flex items-center gap-3">
                     <div onClick={()=> router.back()}>
@@ -113,25 +209,166 @@ const ProductDetail: FC<ProductDetailProps> = () => {
                     </div>
                     <h1 className="text-2xl font-semibold">Back to Product</h1>
                 </div>
+                <div className="mt-10 w-full flex items-center justify-center">
+                    <div className="bg-white w-[80%] min-h-[80vh] rounded-2xl flex flex-col items-center p-10">
+                        {isShowUpgrade?
+                            <>
+                                <h1 className="font-bold text-6xl mt-4">Upload your file</h1>
+                                <p className="text-2xl mt-6 mb-10">PNG, JPG and MP4 files are allowed</p>
+                            </>
+                        :    
+                            <>
+                                <h1 className="font-bold text-6xl">{batchNameValue}</h1>
+                                <p className="text-2xl mt-6">{categoryValue}</p>
+                                <div className="w-full flex jutify-start px-6">
+                                    {isUpgrade && !isShowUpgrade && categoryValue=== 'Fruit'&&
+                                        <div className="px-8 py-6 text-white font-bold rounded-xl bg-[#7E59E7] cursor-pointer flex gap-1 items-center animate-bounce"
+                                        onClick={()=>setIsShowUpgrade(true)}>
+                                           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 256 256"><path fill="currentColor" d="M208 144a15.78 15.78 0 0 1-10.42 14.94l-51.65 19l-19 51.61a15.92 15.92 0 0 1-29.88 0L78 178l-51.62-19a15.92 15.92 0 0 1 0-29.88l51.65-19l19-51.61a15.92 15.92 0 0 1 29.88 0l19 51.65l51.61 19A15.78 15.78 0 0 1 208 144Zm-56-96h16v16a8 8 0 0 0 16 0V48h16a8 8 0 0 0 0-16h-16V16a8 8 0 0 0-16 0v16h-16a8 8 0 0 0 0 16Zm88 32h-8v-8a8 8 0 0 0-16 0v8h-8a8 8 0 0 0 0 16h8v8a8 8 0 0 0 16 0v-8h8a8 8 0 0 0 0-16Z"/></svg>
+                                            AI Classification
+                                        </div> 
+                                    } 
+                                </div>
+                            </>
+                        }
+                
+                        {isShowForm ? 
+                            <div className="w-full justify-center">
+                                <div className="flex p-6 justify-center">
+                                    <StepForm stepNumberId={stepNumberId} handleHideForm={handleHideForm} categoryValue={categoryValue} batchNameValue={batchNameValue}/>
+                                </div> 
+                            </div>
 
-                {isShowForm ? 
-                    <div className="w-full justify-center">
-                        <div className="flex p-6 justify-center">
-                            <StepForm stepNumberId={stepNumberId} handleHideForm={handleHideForm} categoryValue={categoryValue} batchNameValue={batchNameValue}/>
-                        </div> 
-                    </div>
+                        :
+                        <div className="w-full">
+                        {isShowUpgrade?
+                                <div className="p-6 rounded-xl ml-10 bg-white mb-10">
+                                    {/* <input type="file" onChange={handleFileSelect} /> */}
+                                    {fileType === 'image' && 
+                                        (responseImage &&     
+                                            <div className="flex flex-col gap-4 items-center">
+                                                <img src={responseImage} />
+                                                <a
+                                                    href={responseImage}
+                                                    download={responseImage}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="btn"
+                                                >
+                                                    <button>Download IMG</button>
+                                                </a>
 
-                    :
-                    <div className="mt-10 w-full flex items-center justify-center">
-                        <div className="bg-white w-[80%] min-h-[80vh] rounded-2xl flex flex-col items-center p-10">
-                            <h1 className="font-bold text-6xl">{batchNameValue}</h1>
-                            <p className="text-2xl mt-6">{categoryValue}</p>
-                            <div className="w-full">
-                                <div className="flex p-6 gap-10 justify-start flex-wrap">
-                                    {  Array.from({ length: stepNumberValue }, (_, i) => (
-                                            isArrayShow[i]?
-                                            <div className="min-h-[450px] w-[20%] rounded-xl mt-10 flex flex-col items-center justify-center">
-                                                 <div className="w-full h-full px-6 py-10 bg-[#fec652] flex items-center justify-between flex-col rounded-xl">
+                                            </div>
+                                        )
+                                    }
+
+                                    {fileType === 'video' &&
+                                        (videoUrl &&
+                                            <div className="flex justify-center">
+                                                <a
+                                                    href={videoUrl}
+                                                    download={videoUrl}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="btn"
+                                                    >
+                                                    <button>Download Video</button>
+                                                </a>
+                                            </div>
+                                            
+                                        )
+                                    }
+
+                                    { videoUrl === '' && responseImage === '' && 
+                                    <div className="flex items-center justify-center w-full">
+                                        <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-80 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-[#E3DEEF] dark:bg-[#EFECF5] hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-[#E3DEEF]">
+                                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                <svg aria-hidden="true" className="w-24 h-24 mb-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                                                <p className="mb-2 text-lg text-gray-600 dark:text-gray-500"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                                <p className="text-lg text-gray-600 dark:text-gray-400">PNG, JPG or MP4</p>
+                                            </div>
+                                            {/* <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-black" htmlFor="file_input">Upload file</label> */}
+                                            <input type="file" className="bg-white focus:outline-none cursor-pointer hidden" id="dropzone-file" onChange={handleFileSelect}/>
+                                        </label>
+                                    </div>}
+                                    { videoUrl === '' && responseImage === '' && fileName !==''&& <p className="flex justify-center mt-2 p-4 text-xl"><span className="font-bold mr-2">File:</span> {fileName}</p>}
+                                    <div className="flex justify-center gap-2 mt-10">
+                                        <div className="px-10 py-6 text-black font-bold rounded-xl bg-[#E9E9E9] cursor-pointer"
+                                        onClick={()=>{
+                                            setIsShowUpgrade(false)
+                                            setResponseImage('')
+                                            setVideoUrl('')
+                                            setFileName('')
+                                        }
+                                            }>
+                                            Cancel
+                                        </div>
+                                        { videoUrl === '' && responseImage === '' && fileType === 'image' && <button className="px-10 py-6 text-white font-bold rounded-xl bg-[#7E59E7] cursor-pointer" onClick={()=>handleUpload("img")}>Classify</button>}
+                                        { videoUrl === '' && responseImage === '' &&fileType === 'video' && <button className="px-10 py-6 text-white font-bold rounded-xl bg-[#FBD560] cursor-pointer" onClick={()=>handleUpload("video")}>Classify</button>}
+                                    </div>
+                                    {/* <button className="btn" onClick={()=>handleUpload("img")}>Classify Fruit</button> */}
+
+                                </div>
+                            :
+                            <div className="flex p-6 gap-10 justify-start flex-wrap">
+                                {  
+                                    isRole !== '0'?
+                                        (isRole === '1'?
+                                        (    
+                                            isArrayShow[Number(isRole)-1]?
+                                            <div  className="min-h-[450px] w-[20%] rounded-xl mt-10 flex flex-col items-center justify-center">
+                                                <div className="w-full h-full px-6 py-10 bg-[#5FCCA0] flex items-center justify-between flex-col rounded-xl">
+                                                    <h2 className="text-4xl font-bold text-white">Step</h2>
+                                                    <p className="text-8xl font-bold text-white">{Number(isRole)}</p>
+                                                    <div className="w-full">
+                                                        <div className="px-6 py-4 bg-[white] rounded-xl flex justify-center text-xl font-bold text-black cursor-pointer" 
+                                                        >Done</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            :
+                                            <div  className="min-h-[450px] w-[20%] rounded-xl mt-10 flex flex-col items-center justify-center">
+                                                <StepProcess stepId={Number(isRole)-1} handleHide={handleHideForm} setStepNumberId={setStepNumberId}/>
+                                            </div>
+                                        )
+                                        :
+                                        (    
+                                            isArrayShow[Number(isRole)-1]?
+                                            <div  className="min-h-[450px] w-[20%] rounded-xl mt-10 flex flex-col items-center justify-center">
+                                                <div className="w-full h-full px-6 py-10 bg-[#5FCCA0] flex items-center justify-between flex-col rounded-xl">
+                                                    <h2 className="text-4xl font-bold text-white">Step</h2>
+                                                    <p className="text-8xl font-bold text-white">{Number(isRole)}</p>
+                                                    <div className="w-full">
+                                                        <div className="px-6 py-4 bg-[white] rounded-xl flex justify-center text-xl font-bold text-black cursor-pointer" 
+                                                        >Done</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            :
+                                            (
+                                                (Number(isRole) >0) &&isArrayShow[Number(isRole)-2]?
+                                                    <div  className="min-h-[450px] w-[20%] rounded-xl mt-10 flex flex-col items-center justify-center">
+                                                        <StepProcess stepId={Number(isRole)-1} handleHide={handleHideForm} setStepNumberId={setStepNumberId}/>
+                                                    </div>
+                                                :
+                                                    <div  className="min-h-[450px] w-[20%] rounded-xl mt-10 flex flex-col items-center justify-center">
+                                                        <div className="w-full h-full px-6 py-10 bg-[#FE6A78] flex items-center justify-between flex-col rounded-xl">
+                                                            <h2 className="text-4xl font-bold text-white">Step</h2>
+                                                            <p className="text-8xl font-bold text-white">{Number(isRole)}</p>
+                                                            <div className="w-full">
+                                                                <div className="px-6 py-4 bg-[white] rounded-xl flex justify-center text-xl font-bold text-black cursor-pointer" 
+                                                                >Disable</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                            )
+                                        )
+                                        )
+                                    :
+                                Array.from({ length: stepNumberValue }, (_, i) => (        
+                                    isArrayShow[i]?
+                                            <div key={i} className="min-h-[450px] w-[20%] rounded-xl mt-10 flex flex-col items-center justify-center">
+                                                <div className="w-full h-full px-6 py-10 bg-[#5FCCA0] flex items-center justify-between flex-col rounded-xl">
                                                     <h2 className="text-4xl font-bold text-white">Step</h2>
                                                     <p className="text-8xl font-bold text-white">{i+1}</p>
                                                     <div className="w-full">
@@ -141,16 +378,34 @@ const ProductDetail: FC<ProductDetailProps> = () => {
                                                 </div>
                                             </div>
                                             :
-                                            <div key={i} className="min-h-[450px] w-[20%] rounded-xl mt-10 flex flex-col items-center justify-center">
-                                                <StepProcess stepId={i} handleHide={handleHideForm} setStepNumberId={setStepNumberId}/>
-                                            </div>
-                                        ))
-                                    }
-                                </div>
+                                            (
+                                                (i >0) &&isArrayShow[i-1]?
+                                                    <div key={i} className="min-h-[450px] w-[20%] rounded-xl mt-10 flex flex-col items-center justify-center">
+                                                        <StepProcess stepId={i} handleHide={handleHideForm} setStepNumberId={setStepNumberId}/>
+                                                    </div>
+                                                :
+                                                    <div key={i}  className="min-h-[450px] w-[20%] rounded-xl mt-10 flex flex-col items-center justify-center">
+                                                        <div className="w-full h-full px-6 py-10 bg-[#FE6A78] flex items-center justify-between flex-col rounded-xl">
+                                                            <h2 className="text-4xl font-bold text-white">Step</h2>
+                                                            <p className="text-8xl font-bold text-white">{i+1}</p>
+                                                            <div className="w-full">
+                                                                <div className="px-6 py-4 bg-[white] rounded-xl flex justify-center text-xl font-bold text-black cursor-pointer" 
+                                                                >Disable</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                            )
+                                        )
+                                    )
+                                }
                             </div>
+                        }
                         </div>
+                        }
+
                     </div>
-                }
+                </div>
+                    
             </div>
         </Layout>
      );
@@ -162,9 +417,9 @@ const StepProcess: FC<StepProcessProps> = ({stepId, handleHide, setStepNumberId}
     const handleClick = () => {
         handleHide();
         setStepNumberId(stepId);
-      };
+    }
     return ( 
-        <div className="w-full h-full px-6 py-10 bg-[#726BDF] flex items-center justify-between flex-col rounded-xl">
+        <div className="w-full h-full px-6 py-10 bg-[#FFD66A] flex items-center justify-between flex-col rounded-xl hover:scale-110">
             <h2 className="text-4xl font-bold text-white">Step</h2>
             <p className="text-8xl font-bold text-white">{stepId+1}</p>
             <div className="w-full">
@@ -226,8 +481,8 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
             method: "eth_requestAccounts",
         });
           if(stepNumberId === 0){
-            getProcessingContract().then((contract)=>{
-                contract.methods.addStep1(Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, "", dataUser.username, dataUser.usercccd, categoryValue)
+            await getProcessingContract().then(async(contract)=>{
+                await contract.methods.addStep1(Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, "", dataUser.username, dataUser.usercccd, categoryValue)
                 .send({from: accounts[0]})
                 .then((res : any)=>{
                     console.log(res)
@@ -239,8 +494,8 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
                 }).catch((err : any)=>{console.log(err)})
             })
           }else if(stepNumberId === 1){
-            getProcessingContract().then((contract)=>{
-                contract.methods.addStep2(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, "", dataUser.username, dataUser.usercccd, categoryValue)
+            getProcessingContract().then(async (contract)=>{
+                await contract.methods.addStep2(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, "", dataUser.username, dataUser.usercccd, categoryValue)
                 .send({from: accounts[0]})
                 .then((res : any)=>{
                     console.log(res)
@@ -252,8 +507,8 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
                 }).catch((err : any)=>{console.log(err)})
             })
           }else if(stepNumberId === 2){
-            getProcessingContract().then((contract)=>{
-                contract.methods.addStep3(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, "", dataUser.username, dataUser.usercccd, categoryValue)
+            getProcessingContract().then(async(contract)=>{
+                await contract.methods.addStep3(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, "", dataUser.username, dataUser.usercccd, categoryValue)
                 .send({from: accounts[0]})
                 .then((res : any)=>{
                     console.log(res)
@@ -265,8 +520,8 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
                 }).catch((err : any)=>{console.log(err)})
             })
           }else if(stepNumberId === 3){
-            getProcessingContract().then((contract)=>{
-                contract.methods.addStep4(0,Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, "", dataUser.username, dataUser.usercccd, categoryValue)
+            getProcessingContract().then(async(contract)=>{
+                await contract.methods.addStep4(0,Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, "", dataUser.username, dataUser.usercccd, categoryValue)
                 .send({from: accounts[0]})
                 .then((res : any)=>{
                     console.log(res)
@@ -278,8 +533,8 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
                 }).catch((err : any)=>{console.log(err)})
             })
           }else if(stepNumberId === 4){
-            getProcessingContract().then((contract)=>{
-                contract.methods.addStep5(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, "", dataUser.username, dataUser.usercccd, categoryValue)
+            getProcessingContract().then(async(contract)=>{
+                await contract.methods.addStep5(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, "", dataUser.username, dataUser.usercccd, categoryValue)
                 .send({from: accounts[0]})
                 .then((res : any)=>{
                     console.log(res)
@@ -291,8 +546,8 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
                 }).catch((err : any)=>{console.log(err)})
             })
           }else if(stepNumberId === 5){
-            getProcessingContract().then((contract)=>{
-                contract.methods.addStep6(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, "", dataUser.username, dataUser.usercccd, categoryValue)
+            getProcessingContract().then(async(contract)=>{
+                await contract.methods.addStep6(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, "", dataUser.username, dataUser.usercccd, categoryValue)
                 .send({from: accounts[0]})
                 .then((res : any)=>{
                     console.log(res)
@@ -304,8 +559,8 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
                 }).catch((err : any)=>{console.log(err)})
             })
           }else if(stepNumberId === 6){
-            getProcessingContract().then((contract)=>{
-                contract.methods.addStep7(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, "", dataUser.username, dataUser.usercccd, categoryValue)
+            getProcessingContract().then(async(contract)=>{
+                await contract.methods.addStep7(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, "", dataUser.username, dataUser.usercccd, categoryValue)
                 .send({from: accounts[0]})
                 .then((res : any)=>{
                     console.log(res)
@@ -317,8 +572,8 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
                 }).catch((err : any)=>{console.log(err)})
             })
           }else if(stepNumberId === 7){
-            getProcessingContract().then((contract)=>{
-                contract.methods.addStep8(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, "", dataUser.username, dataUser.usercccd, categoryValue)
+            getProcessingContract().then(async(contract)=>{
+                await contract.methods.addStep8(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, "", dataUser.username, dataUser.usercccd, categoryValue)
                 .send({from: accounts[0]})
                 .then((res : any)=>{
                     console.log(res)
@@ -335,11 +590,11 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
     return ( 
         <form 
         onSubmit={handleSubmit(onSubmit)}
-        className="h-full w-[60%] p-10 rounded-xl mt-10 flex flex-col items-center justify-center shadow-lg bg-white">
+        className="h-full w-[60%] p-10 rounded-xl flex flex-col items-center justify-center shadow-lg bg-white">
         <Toaster />
-        <div className="w-full flex justify-between items-center mb-6">
+        <div className="w-full flex justify-center items-center mb-6">
             <h2 className="text-3xl font-bold">Create Step {stepNumberId+1}</h2>
-            <div className="btn" onClick={handleHideForm}>Cancel</div>
+            
         </div>
         <div className="w-full flex flex-col justify-center mt-10">
             <div className="flex items-center">
@@ -380,7 +635,10 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
                 <input type="text" id="citizenId" value={dataUser.usercccd && dataUser.usercccd|| ''} disabled className="ml-4 px-4 py-4 rounded-[10px] flex-1" placeholder="Enter citizen identification number"/>
             </div>
         </div>
-        <Button title="Create" className="btn mt-10"/>
+        <div className="flex gap-2 mt-10">
+            <div className="px-8 py-6 bg-[#E8E8E8] text-black font-bold" onClick={handleHideForm}>Cancel</div>
+            <Button title="Create" className="btn"/>
+        </div>
     </form>  
      );
 }

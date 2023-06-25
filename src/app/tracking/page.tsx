@@ -1,5 +1,5 @@
 'use client';
-import { FC, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import Button from "../components/Button";
 import { useRouter } from 'next/navigation';
@@ -73,13 +73,12 @@ const Tracking: FC<ProductsProps> = () => {
     })
     const [listProductFilter, setListProductFilter] = useState<TableProductType[]>(listProduct)
 
-    function filterProductsByKeyword(keyword: string): TableProductType[] {
+    const filterProductsByKeyword = (keyword: string): TableProductType[] => {
         const filteredProducts = listProduct.filter((product) => {
             return (
                 product.productName.toLowerCase().includes(keyword.toLowerCase())
             );
         });
-        
         return filteredProducts;
     }
 
