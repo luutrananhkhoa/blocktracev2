@@ -98,7 +98,6 @@ const Profile: FC<ProfileProps> = () => {
         const storedData = localStorage.getItem('user_data');
         if (storedData) {
             const parsedData = JSON.parse(storedData);
-            console.log('user: ', parsedData)
             SetDataUser(parsedData)
         }
         

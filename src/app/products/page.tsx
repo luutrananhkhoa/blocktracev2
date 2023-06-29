@@ -83,7 +83,6 @@ const Products: FC<ProductsProps> = () => {
         let userId = ''
         if (storedData) {
             const parsedData = JSON.parse(storedData);
-            console.log('user: ', parsedData)
             userType = parsedData.usertype 
             userTeamId = parsedData.teamid 
             userId = parsedData.userid 
@@ -98,15 +97,10 @@ const Products: FC<ProductsProps> = () => {
               from: accounts[0]
             })
             .then(async(response : any)=>{
-                console.log('List product:', response)
-                console.log('userType:', userType)
-                console.log('userTeamId:', userTeamId)
                 let arrayList : TableProductType[] = []; 
                 await response.map((product : any)=>{
                     if(userType.includes('Team')){
-                        console.log('Team')
                         if(product.teamId.toString() === userTeamId.toString()){
-                            console.log('Save Team')
                             let item = {
                                 id: Number(product["batchId"]),
                                 productName: product["batchName"],
@@ -117,9 +111,7 @@ const Products: FC<ProductsProps> = () => {
                             arrayList.push(item)
                         }
                     }else if(userType.includes('Personal')){
-                        console.log('Personal')
                         if(product.userId.toString() === userId){
-                            console.log('Save Personal')
                             let item = {
                                 id: Number(product["batchId"]),
                                 productName: product["batchName"],
@@ -132,7 +124,6 @@ const Products: FC<ProductsProps> = () => {
                     }
                    
                 })
-                console.log('arrayList', arrayList)
                 setListProduct(arrayList)
                 setListProductFilter(arrayList)
             

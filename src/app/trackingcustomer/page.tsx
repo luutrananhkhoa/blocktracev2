@@ -107,7 +107,7 @@ const TrackingCustomer: FC<TrackingCustomerProps> = () => {
     })
 
     const handleTracking = async () => {
-
+        let flag = false
         if(inputValue.trim() !== ''){
             let batchId :string = ''
             const accounts = window.ethereum.request({
@@ -116,26 +116,56 @@ const TrackingCustomer: FC<TrackingCustomerProps> = () => {
 
             await getBatchContract().then(async (contract) =>  {
                 await contract.methods.getAllBatch().call({
-                from: accounts[0]
+                    from: accounts[0]
                 })
                 .then((response : any)=>{
-                    console.log('response', response)
                     const filteredArr = response.filter((obj : any) => obj["verifyCode"] === inputValue);
-                    const filteredArrFinal = filteredArr[0]
-                    if(filteredArrFinal.length > 0){
-                        console.log('filteredArrFinal', filteredArrFinal)
-                        batchId = filteredArrFinal["batchId"]
+                    if(filteredArr.length >0){
+                        const filteredArrFinal = filteredArr[0]
+                        if(filteredArrFinal.length > 0){
+                            batchId = filteredArrFinal["batchId"]
+                            flag=true
+                        }
+                    }else{
+                        flag=false
                     }
                 })
                 .catch((err : any)=>{console.log(err);})
             })  
-
-            await getProcessingContract().then(async(contract) =>{
-                await contract.methods.getAllStep1().call({
-                from: accounts[0]
+            if(!flag){
+                toast.error("Product is not exist!")
+            }else{
+                await getProcessingContract().then(async(contract) =>{
+                    await contract.methods.getAllStep1().call({
+                    from: accounts[0]
+                    })
+                    .then((response : any)=>{
+                        console.log('List step 1:', response)
+                        const filteredArr = response.filter((obj : any) => obj["batchId"] === batchId);
+                        const filteredArrFinal = filteredArr[0]
+                        if(filteredArrFinal && filteredArrFinal.length > 0){
+                            let item = {
+                                productName: filteredArrFinal["productName"],
+                                batchId: filteredArrFinal["batchId"],
+                                userName: filteredArrFinal["userName"],
+                                location: filteredArrFinal["location"],
+                                date: filteredArrFinal["date"],
+                                categories: filteredArrFinal["categories"],
+                                photo: filteredArrFinal["photo"]
+                            }
+                            setDataStep1(item)
+                            setStepComplete((prev)=>prev+1)
+                        }
+                    })
+                    .catch((err : any)=>{console.log(err);})
+                })
+    
+                await getProcessingContract().then(async(contract) =>{
+                await contract.methods.getAllStep2().call({
+                    from: accounts[0]
                 })
                 .then((response : any)=>{
-                    console.log('List step 1:', response)
+                    console.log('List step 2:', response)
                     const filteredArr = response.filter((obj : any) => obj["batchId"] === batchId);
                     const filteredArrFinal = filteredArr[0]
                     if(filteredArrFinal && filteredArrFinal.length > 0){
@@ -148,188 +178,164 @@ const TrackingCustomer: FC<TrackingCustomerProps> = () => {
                             categories: filteredArrFinal["categories"],
                             photo: filteredArrFinal["photo"]
                         }
-                        setDataStep1(item)
+                        setDataStep2(item)
                         setStepComplete((prev)=>prev+1)
                     }
                 })
                 .catch((err : any)=>{console.log(err);})
-            })
-
-            await getProcessingContract().then(async(contract) =>{
-            await contract.methods.getAllStep2().call({
-                from: accounts[0]
-            })
-            .then((response : any)=>{
-                console.log('List step 2:', response)
-                const filteredArr = response.filter((obj : any) => obj["batchId"] === batchId);
-                const filteredArrFinal = filteredArr[0]
-                if(filteredArrFinal && filteredArrFinal.length > 0){
-                    let item = {
-                        productName: filteredArrFinal["productName"],
-                        batchId: filteredArrFinal["batchId"],
-                        userName: filteredArrFinal["userName"],
-                        location: filteredArrFinal["location"],
-                        date: filteredArrFinal["date"],
-                        categories: filteredArrFinal["categories"],
-                        photo: filteredArrFinal["photo"]
+                })
+    
+                await getProcessingContract().then(async(contract) =>{
+                await contract.methods.getAllStep3().call({
+                    from: accounts[0]
+                })
+                .then((response : any)=>{
+                    console.log('List step 3:', response)
+                    const filteredArr = response.filter((obj : any) => obj["batchId"] === batchId);
+                    const filteredArrFinal = filteredArr[0]
+                    if(filteredArrFinal && filteredArrFinal.length > 0){
+                        let item = {
+                            productName: filteredArrFinal["productName"],
+                            batchId: filteredArrFinal["batchId"],
+                            userName: filteredArrFinal["userName"],
+                            location: filteredArrFinal["location"],
+                            date: filteredArrFinal["date"],
+                            categories: filteredArrFinal["categories"],
+                            photo: filteredArrFinal["photo"]
+                        }
+                        setDataStep3(item)
+                        setStepComplete((prev)=>prev+1)
                     }
-                    setDataStep2(item)
-                    setStepComplete((prev)=>prev+1)
-                }
-            })
-            .catch((err : any)=>{console.log(err);})
-            })
-
-            await getProcessingContract().then(async(contract) =>{
-            await contract.methods.getAllStep3().call({
-                from: accounts[0]
-            })
-            .then((response : any)=>{
-                console.log('List step 3:', response)
-                const filteredArr = response.filter((obj : any) => obj["batchId"] === batchId);
-                const filteredArrFinal = filteredArr[0]
-                if(filteredArrFinal && filteredArrFinal.length > 0){
-                    let item = {
-                        productName: filteredArrFinal["productName"],
-                        batchId: filteredArrFinal["batchId"],
-                        userName: filteredArrFinal["userName"],
-                        location: filteredArrFinal["location"],
-                        date: filteredArrFinal["date"],
-                        categories: filteredArrFinal["categories"],
-                        photo: filteredArrFinal["photo"]
+                })
+                .catch((err : any)=>{console.log(err);})
+                })
+    
+                await getProcessingContract().then(async(contract) =>{
+                await contract.methods.getAllStep4().call({
+                    from: accounts[0]
+                })
+                .then((response : any)=>{
+                    console.log('List step 4:', response)
+                    const filteredArr = response.filter((obj : any) => obj["batchId"] === batchId);
+                    const filteredArrFinal = filteredArr[0]
+                    if(filteredArrFinal && filteredArrFinal.length > 0){
+                        let item = {
+                            productName: filteredArrFinal["productName"],
+                            batchId: filteredArrFinal["batchId"],
+                            userName: filteredArrFinal["userName"],
+                            location: filteredArrFinal["location"],
+                            date: filteredArrFinal["date"],
+                            categories: filteredArrFinal["categories"],
+                            photo: filteredArrFinal["photo"]
+                        }
+                        setDataStep4(item)
+                        setStepComplete((prev)=>prev+1)
                     }
-                    setDataStep3(item)
-                    setStepComplete((prev)=>prev+1)
-                }
-            })
-            .catch((err : any)=>{console.log(err);})
-            })
-
-            await getProcessingContract().then(async(contract) =>{
-            await contract.methods.getAllStep4().call({
-                from: accounts[0]
-            })
-            .then((response : any)=>{
-                console.log('List step 4:', response)
-                const filteredArr = response.filter((obj : any) => obj["batchId"] === batchId);
-                const filteredArrFinal = filteredArr[0]
-                if(filteredArrFinal && filteredArrFinal.length > 0){
-                    let item = {
-                        productName: filteredArrFinal["productName"],
-                        batchId: filteredArrFinal["batchId"],
-                        userName: filteredArrFinal["userName"],
-                        location: filteredArrFinal["location"],
-                        date: filteredArrFinal["date"],
-                        categories: filteredArrFinal["categories"],
-                        photo: filteredArrFinal["photo"]
+                })
+                .catch((err : any)=>{console.log(err);})
+                })
+    
+                await getProcessingContract().then( async (contract) =>{
+                await contract.methods.getAllStep5().call({
+                    from: accounts[0]
+                })
+                .then((response : any)=>{
+                    console.log('List step 5:', response)
+                    const filteredArr = response.filter((obj : any) => obj["batchId"] === batchId);
+                    const filteredArrFinal = filteredArr[0]
+                    if(filteredArrFinal && filteredArrFinal.length > 0){
+                        let item = {
+                            productName: filteredArrFinal["productName"],
+                            batchId: filteredArrFinal["batchId"],
+                            userName: filteredArrFinal["userName"],
+                            location: filteredArrFinal["location"],
+                            date: filteredArrFinal["date"],
+                            categories: filteredArrFinal["categories"],
+                            photo: filteredArrFinal["photo"]
+                        }
+                        setDataStep5(item)
+                        setStepComplete((prev)=>prev+1)
                     }
-                    setDataStep4(item)
-                    setStepComplete((prev)=>prev+1)
-                }
-            })
-            .catch((err : any)=>{console.log(err);})
-            })
-
-            await getProcessingContract().then( async (contract) =>{
-            await contract.methods.getAllStep5().call({
-                from: accounts[0]
-            })
-            .then((response : any)=>{
-                console.log('List step 5:', response)
-                const filteredArr = response.filter((obj : any) => obj["batchId"] === batchId);
-                const filteredArrFinal = filteredArr[0]
-                if(filteredArrFinal && filteredArrFinal.length > 0){
-                    let item = {
-                        productName: filteredArrFinal["productName"],
-                        batchId: filteredArrFinal["batchId"],
-                        userName: filteredArrFinal["userName"],
-                        location: filteredArrFinal["location"],
-                        date: filteredArrFinal["date"],
-                        categories: filteredArrFinal["categories"],
-                        photo: filteredArrFinal["photo"]
+                })
+                .catch((err : any)=>{console.log(err);})
+                })
+    
+                await getProcessingContract().then( async (contract) =>{
+                await contract.methods.getAllStep6().call({
+                    from: accounts[0]
+                })
+                .then((response : any)=>{
+                    console.log('List step 6:', response)
+                    const filteredArr = response.filter((obj : any) => obj["batchId"] === batchId);
+                    const filteredArrFinal = filteredArr[0]
+                    if(filteredArrFinal && filteredArrFinal.length > 0){
+                        let item = {
+                            productName: filteredArrFinal["productName"],
+                            batchId: filteredArrFinal["batchId"],
+                            userName: filteredArrFinal["userName"],
+                            location: filteredArrFinal["location"],
+                            date: filteredArrFinal["date"],
+                            categories: filteredArrFinal["categories"],
+                            photo: filteredArrFinal["photo"]
+                        }
+                        setDataStep6(item)
+                        setStepComplete((prev)=>prev+1)
                     }
-                    setDataStep5(item)
-                    setStepComplete((prev)=>prev+1)
-                }
-            })
-            .catch((err : any)=>{console.log(err);})
-            })
-
-            await getProcessingContract().then( async (contract) =>{
-            await contract.methods.getAllStep6().call({
-                from: accounts[0]
-            })
-            .then((response : any)=>{
-                console.log('List step 6:', response)
-                const filteredArr = response.filter((obj : any) => obj["batchId"] === batchId);
-                const filteredArrFinal = filteredArr[0]
-                if(filteredArrFinal && filteredArrFinal.length > 0){
-                    let item = {
-                        productName: filteredArrFinal["productName"],
-                        batchId: filteredArrFinal["batchId"],
-                        userName: filteredArrFinal["userName"],
-                        location: filteredArrFinal["location"],
-                        date: filteredArrFinal["date"],
-                        categories: filteredArrFinal["categories"],
-                        photo: filteredArrFinal["photo"]
+                })
+                .catch((err : any)=>{console.log(err);})
+                })
+    
+                await getProcessingContract().then( async (contract) =>{
+                await contract.methods.getAllStep7().call({
+                    from: accounts[0]
+                })
+                .then((response : any)=>{
+                    console.log('List step 7:', response)
+                    const filteredArr = response.filter((obj : any) => obj["batchId"] === batchId);
+                    const filteredArrFinal = filteredArr[0]
+                    if(filteredArrFinal && filteredArrFinal.length > 0){
+                        let item = {
+                            productName: filteredArrFinal["productName"],
+                            batchId: filteredArrFinal["batchId"],
+                            userName: filteredArrFinal["userName"],
+                            location: filteredArrFinal["location"],
+                            date: filteredArrFinal["date"],
+                            categories: filteredArrFinal["categories"],
+                            photo: filteredArrFinal["photo"]
+                        }
+                        setDataStep7(item)
+                        setStepComplete((prev)=>prev+1)
                     }
-                    setDataStep6(item)
-                    setStepComplete((prev)=>prev+1)
-                }
-            })
-            .catch((err : any)=>{console.log(err);})
-            })
-
-            await getProcessingContract().then( async (contract) =>{
-            await contract.methods.getAllStep7().call({
-                from: accounts[0]
-            })
-            .then((response : any)=>{
-                console.log('List step 7:', response)
-                const filteredArr = response.filter((obj : any) => obj["batchId"] === batchId);
-                const filteredArrFinal = filteredArr[0]
-                if(filteredArrFinal && filteredArrFinal.length > 0){
-                    let item = {
-                        productName: filteredArrFinal["productName"],
-                        batchId: filteredArrFinal["batchId"],
-                        userName: filteredArrFinal["userName"],
-                        location: filteredArrFinal["location"],
-                        date: filteredArrFinal["date"],
-                        categories: filteredArrFinal["categories"],
-                        photo: filteredArrFinal["photo"]
+                })
+                .catch((err : any)=>{console.log(err);})
+                })
+    
+                await getProcessingContract().then( async (contract) =>{
+                await contract.methods.getAllStep8().call({
+                    from: accounts[0]
+                })
+                .then((response : any)=>{
+                    console.log('List step 8:', response)
+                    const filteredArr = response.filter((obj : any) => obj["batchId"] === batchId);
+                    const filteredArrFinal = filteredArr[0]
+                    if(filteredArrFinal && filteredArrFinal.length > 0){
+                        let item = {
+                            productName: filteredArrFinal["productName"],
+                            batchId: filteredArrFinal["batchId"],
+                            userName: filteredArrFinal["userName"],
+                            location: filteredArrFinal["location"],
+                            date: filteredArrFinal["date"],
+                            categories: filteredArrFinal["categories"],
+                            photo: filteredArrFinal["photo"]
+                        }
+                        setDataStep8(item)
+                        setStepComplete((prev)=>prev+1)
                     }
-                    setDataStep7(item)
-                    setStepComplete((prev)=>prev+1)
-                }
-            })
-            .catch((err : any)=>{console.log(err);})
-            })
-
-            await getProcessingContract().then( async (contract) =>{
-            await contract.methods.getAllStep8().call({
-                from: accounts[0]
-            })
-            .then((response : any)=>{
-                console.log('List step 8:', response)
-                const filteredArr = response.filter((obj : any) => obj["batchId"] === batchId);
-                const filteredArrFinal = filteredArr[0]
-                if(filteredArrFinal && filteredArrFinal.length > 0){
-                    let item = {
-                        productName: filteredArrFinal["productName"],
-                        batchId: filteredArrFinal["batchId"],
-                        userName: filteredArrFinal["userName"],
-                        location: filteredArrFinal["location"],
-                        date: filteredArrFinal["date"],
-                        categories: filteredArrFinal["categories"],
-                        photo: filteredArrFinal["photo"]
-                    }
-                    setDataStep8(item)
-                    setStepComplete((prev)=>prev+1)
-                }
-            })
-            .catch((err : any)=>{console.log(err);})
-            })
-            setIsShowTracking(true)
+                })
+                .catch((err : any)=>{console.log(err);})
+                })
+                setIsShowTracking(true)
+            }
         }else{
             toast.error("Please enter code!")
         }
@@ -690,7 +696,7 @@ const TrackingCustomer: FC<TrackingCustomerProps> = () => {
                                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                                             <svg aria-hidden="true" className="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                                         </div>
-                                        <input type="search" id="searchProduct" onChange={(e)=>setInputValue(e.target.value)} className="block w-full p-6 pl-10 text-lg  border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Enter QR code value" required />
+                                        <input type="search" id="searchProduct" onChange={(e)=>setInputValue(e.target.value)} className="block w-full p-6 pl-10 text-lg focus:outline-none border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Enter QR code value" required />
                                         <div className="text-white absolute right-2.5 bottom-2.5 bg-[#726BDF] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-6 py-4 cursor-pointer"
                                             onClick={()=>handleTracking()}
                                             >Search</div>

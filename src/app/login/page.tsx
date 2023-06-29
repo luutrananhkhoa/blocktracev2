@@ -35,7 +35,6 @@ const Login: FC<LoginProps> = () => {
             method: "eth_requestAccounts",
         });
         if(accounts[0]){
-            console.log(accounts[0])
             setAddressWallet(accounts[0])
 
             await getUserContract().then(async(contract) =>{
@@ -43,21 +42,15 @@ const Login: FC<LoginProps> = () => {
                   from: addressWallet
                 })
                 .then(async(response : any)=>{
-                  console.log('List user:', response)
-
                     let flag = await response && response.some((item: { [x: string]: string; }) => {
-                        console.log('1')
                         let i : string = item['userAddress'];
-                        return i.toLowerCase() === accounts[0].toLowerCase();
+                        return i.toLowerCase() === accounts[0].toLowerCase() && item['userType'] !== 'Customer';
                     });
-                    console.log('2', flag)
                     if(!flag){
-                        console.log('3', flag)
                         toast.error("You don't have an account!")
                         setValidateLogin(false)
                     }else{
                         toast.success('Welcome to Block Trace!')
-                        console.log('4', flag)
                         const userDataStorage = localStorage.getItem('user_data');
                         if(userDataStorage){
                             localStorage.removeItem('user_data');

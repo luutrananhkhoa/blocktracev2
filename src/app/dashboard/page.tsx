@@ -12,11 +12,12 @@ import {
     LinearScale,
     PointElement,
     LineElement,
+    BarElement,
     Title,
     Tooltip,
     Legend,
   } from 'chart.js';
-import { Line } from 'react-chartjs-2';
+import { Line, Bar } from 'react-chartjs-2';
 import Link from "next/link";
 import { getBatchContract } from "../contracts/batchContract";
 import { getUserContract } from "../contracts/userContract";
@@ -30,6 +31,7 @@ ChartJS.register(
     LinearScale,
     PointElement,
     LineElement,
+    BarElement,
     Title,
     Tooltip,
     Legend
@@ -43,63 +45,66 @@ const Dashboard: FC<DashboardProps> = () => {
     const options = {
         responsive: true,
         plugins: {
-          legend: {
+            legend: {
             position: 'top' as const,
-          },
-          title: {
+            },
+            title: {
             display: true,
-            // text: 'Chart.js Line Chart',
-          },
+            text: 'Chart',
+            },
         },
         maintainAspectRatio: false
     };
 
-    const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
+    const labels = ['Statistics'];
 
     const data = {
         labels,
         datasets: [
           {
-            label: 'Fruit',
-            data: [123, -343, 2, 45, 123, -12, 22],
-            borderColor: 'rgb(255, 99, 132)',
-            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+            label: 'Users',
+            data: [countUsers],
+            backgroundColor: 'rgb(144,194,243)',
           },
           {
-            label: 'Others',
-            data: [333, -11, 232, -45, 54, 32, 222],
-            borderColor: 'rgb(53, 162, 235)',
-            backgroundColor: 'rgba(53, 162, 235, 0.5)',
+            label: 'Products',
+            data:  [countProducts],
+            backgroundColor: 'rgb(236,210,150)',
           },
+          {
+            label: 'Subsystem',
+            data:  [1],
+            backgroundColor: 'rgb(234,166,237)',
+          }
         ],
-    };
+      };
 
     useEffect(()=>{
         toast.success('Welcome!');
-        getBatchContract().then(async (contract) =>  {
-            const accounts = await window.ethereum.request({
-                method: "eth_requestAccounts",
-            });
-            await contract.methods.getAllBatch().call({
-              from: accounts[0]
-            })
-            .then(async(response : any)=>{
-                console.log('Number of product:', response.length);
-                setCountUsers(response.length)
-                })
-            })
-        .catch((err : any)=>{console.log(err);}) 
-        
-        getUserContract().then(async (contract) =>{
+        getUserContract().then(async (contract) =>  {
             const accounts = await window.ethereum.request({
                 method: "eth_requestAccounts",
             });
             await contract.methods.getAllUser().call({
               from: accounts[0]
             })
+            .then(async(response : any)=>{
+                console.log('users: ',response)
+                setCountUsers(response.length)
+                })
+            })
+        .catch((err : any)=>{console.log(err);}) 
+        
+        getBatchContract().then(async (contract) =>{
+            const accounts = await window.ethereum.request({
+                method: "eth_requestAccounts",
+            });
+            await contract.methods.getAllBatch().call({
+              from: accounts[0]
+            })
             .then((response : any)=>{
-              console.log('Number of users:', response.length);
-              setCountProducts(response.length)
+                console.log('products: ',response)
+                setCountProducts(response.length)
             })
             .catch((err : any)=>{console.log(err);})
           })
@@ -137,56 +142,9 @@ const Dashboard: FC<DashboardProps> = () => {
                                 </Link>
                             </div>
                         </div>
-                        {/* <section className="grid md:grid-cols-2 xl:grid-cols-4 gap-6">
-                            <div className="flex items-center p-8 bg-white shadow rounded-lg">
-                                <div className="inline-flex flex-shrink-0 items-center justify-center h-16 w-16 text-purple-600 bg-purple-100 rounded-full mr-6">
-                                    <svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="h-6 w-6">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <span className="block text-2xl font-bold">89562</span>
-                                    <span className="block text-gray-500">Users</span>
-                                </div>
-                            </div>
-                            <div className="flex items-center p-8 bg-white shadow rounded-lg">
-                                <div className="inline-flex flex-shrink-0 items-center justify-center h-16 w-16 text-green-600 bg-green-100 rounded-full mr-6">
-                                    <svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="h-6 w-6">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <span className="block text-2xl font-bold">27.6%</span>
-                                    <span className="block text-gray-500">CTR</span>
-                                </div>
-                            </div>
-                            <div className="flex items-center p-8 bg-white shadow rounded-lg">
-                                <div className="inline-flex flex-shrink-0 items-center justify-center h-16 w-16 text-red-600 bg-red-100 rounded-full mr-6">
-                                    <svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="h-6 w-6">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <span className="inline-block text-2xl font-bold">3m 45s</span>
-                                    <span className="inline-block text-xl text-gray-500 font-semibold">(-32%)</span>
-                                    <span className="block text-gray-500">Average</span>
-                                </div>
-                            </div>
-                            <div className="flex items-center p-8 bg-white shadow rounded-lg">
-                                <div className="inline-flex flex-shrink-0 items-center justify-center h-16 w-16 text-blue-600 bg-blue-100 rounded-full mr-6">
-                                    <svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="h-6 w-6">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <span className="block text-2xl font-bold">956</span>
-                                    <span className="block text-gray-500">Products</span>
-                                </div>
-                            </div>
-                        </section> */}
                         <div className="w-full flex">
                             <div className="flex-1 w-[20vh] h-[50vh]">
-                                <Line options={options} data={data} />
+                                <Bar options={options} data={data} />
                             </div>
                             <div className="p-6 flex-1 flex flex-col justify-center gap-6">
                                 <div className="flex items-center p-8 bg-[#FFFCF1] rounded-xl">

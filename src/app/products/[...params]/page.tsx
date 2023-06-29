@@ -107,7 +107,6 @@ const ProductDetail: FC<ProductDetailProps> = () => {
         const storedData = localStorage.getItem('user_data');
         if (storedData) {
             const parsedData = JSON.parse(storedData);
-            console.log('user: ', parsedData)
             // if(parsedData.usertype === "Team"){
             //     setIsRole(parsedData.userole);
             // }
@@ -429,6 +428,8 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
         teamid: null
     })
 
+    const [productCategory, setProductCategory] = useState('');
+
     const [selectedFile, setSelectedFile] = useState(null);
     const [responseImage, setResponseImage] = useState('');
     const [videoUrl, setVideoUrl] = useState('');
@@ -465,51 +466,53 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
       
     const handleUploadNFT = async () =>{
 
-        const randomCode = generateRandomNumber();
-        const url = responseImage
+        if(responseImage !== ''){
+            const randomCode = generateRandomNumber();
+            const url = responseImage
 
-        const fileName = randomCode.toString() + url.split("/static/")[1]
+            const fileName = randomCode.toString() + url.split("/static/")[1]
 
-        await convertImageToBlob(url, fileName)
-        .then(async(file) => {
-            // Access the file object here
-            console.log('log file:', file);
-            if(file){
-                const fileName = file.name;
-                const newFile = new File([file], fileName, {
-                  type: file.type,
-                  lastModified: file.lastModified,
-                });
-      
-                const ipfsImage = await storeNFT(
-                  newFile,
-                  fileName,
-                  "description"
-                ).then(async(success) => {
-                  return await axios
-                      .get(
-                        `https://cloudflare-ipfs.com/ipfs/${success.ipnft}/metadata.json`
-                      )
-                      .then((imageURL) => {
-                          const a = imageURL.data?.image;
-                          const x = a.replace(
-                              "ipfs://",
-                              "https://cloudflare-ipfs.com/ipfs/"
-                          );
-                          console.log('link:', x);
-                          setLinkImg(x);
-                          return x
-                      })
-                      .catch((error) => console.log(error));
-                  })
-                  .catch((error) => console.log(error));
-                  
-                  return ipfsImage
-              }
-        })
-        .catch((error) => {
-            console.error('Error converting image:', error);
-        });
+            await convertImageToBlob(url, fileName)
+            .then(async(file) => {
+                // Access the file object here
+                console.log('log file:', file);
+                if(file){
+                    const fileName = file.name;
+                    const newFile = new File([file], fileName, {
+                    type: file.type,
+                    lastModified: file.lastModified,
+                    });
+        
+                    const ipfsImage = await storeNFT(
+                    newFile,
+                    fileName,
+                    "description"
+                    ).then(async(success) => {
+                    return await axios
+                        .get(
+                            `https://cloudflare-ipfs.com/ipfs/${success.ipnft}/metadata.json`
+                        )
+                        .then((imageURL) => {
+                            const a = imageURL.data?.image;
+                            const x = a.replace(
+                                "ipfs://",
+                                "https://cloudflare-ipfs.com/ipfs/"
+                            );
+                            console.log('link:', x);
+                            setLinkImg(x);
+                            return x
+                        })
+                        .catch((error) => console.log(error));
+                    })
+                    .catch((error) => console.log(error));
+                    
+                    return ipfsImage
+                }
+            })
+            .catch((error) => {
+                console.error('Error converting image:', error);
+            });
+        }
 
     }
 
@@ -574,23 +577,38 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
         const storedData = localStorage.getItem('user_data');
         if (storedData) {
             const parsedData = JSON.parse(storedData);
-            console.log('user: ', parsedData)
             SetDataUser(parsedData)
         }
         
+        getBatchContract().then(async (contract) =>  {
+            const accounts = await window.ethereum.request({
+                method: "eth_requestAccounts",
+            });
+            await contract.methods.getAllBatch().call({
+              from: accounts[0]
+            })
+            .then((response : any)=>{ 
+                console.log('response 21: ', response)
+                response.forEach((product : any)=>{
+                    if(product["batchId"] === batchId){
+                        setProductCategory(product["categories"].toLowerCase()) 
+                    }
+                })
+            
+            })
+            .catch((err : any)=>{console.log(err);})
+        }) 
+
     },[])
 
     const onSubmit = async (data : any ) => {
-        console.log('data: ', data)
         const dataNFT = await handleUploadNFT()
-
-        console.log('dataNFT: ', dataNFT)
         const accounts = await window.ethereum.request({
             method: "eth_requestAccounts",
         });
         if(stepNumberId === 0){
             await getProcessingContract().then(async(contract)=>{
-                await contract.methods.addStep1(Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, dataNFT, dataUser.username, dataUser.usercccd, categoryValue)
+                await contract.methods.addStep1(Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, responseImage !== ''? linkImg : '', dataUser.username, dataUser.usercccd, categoryValue)
                 .send({from: accounts[0]})
                 .then((res : any)=>{
                     console.log(res)
@@ -603,7 +621,7 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
         })
         }else if(stepNumberId === 1){
         getProcessingContract().then(async (contract)=>{
-            await contract.methods.addStep2(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, linkImg, dataUser.username, dataUser.usercccd, categoryValue)
+            await contract.methods.addStep2(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, responseImage !== ''? linkImg : '', dataUser.username, dataUser.usercccd, categoryValue)
             .send({from: accounts[0]})
             .then((res : any)=>{
                 console.log(res)
@@ -616,7 +634,7 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
         })
         }else if(stepNumberId === 2){
         getProcessingContract().then(async(contract)=>{
-            await contract.methods.addStep3(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, linkImg, dataUser.username, dataUser.usercccd, categoryValue)
+            await contract.methods.addStep3(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, responseImage !== ''? linkImg : '', dataUser.username, dataUser.usercccd, categoryValue)
             .send({from: accounts[0]})
             .then((res : any)=>{
                 console.log(res)
@@ -629,7 +647,7 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
         })
         }else if(stepNumberId === 3){
         getProcessingContract().then(async(contract)=>{
-            await contract.methods.addStep4(0,Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, "", dataUser.username, dataUser.usercccd, categoryValue)
+            await contract.methods.addStep4(0,Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, responseImage !== ''? linkImg : '', dataUser.username, dataUser.usercccd, categoryValue)
             .send({from: accounts[0]})
             .then((res : any)=>{
                 console.log(res)
@@ -642,7 +660,7 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
         })
         }else if(stepNumberId === 4){
         getProcessingContract().then(async(contract)=>{
-            await contract.methods.addStep5(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, "", dataUser.username, dataUser.usercccd, categoryValue)
+            await contract.methods.addStep5(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, responseImage !== ''? linkImg : '', dataUser.username, dataUser.usercccd, categoryValue)
             .send({from: accounts[0]})
             .then((res : any)=>{
                 console.log(res)
@@ -655,7 +673,7 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
         })
         }else if(stepNumberId === 5){
         getProcessingContract().then(async(contract)=>{
-            await contract.methods.addStep6(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, "", dataUser.username, dataUser.usercccd, categoryValue)
+            await contract.methods.addStep6(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, responseImage !== ''? linkImg : '', dataUser.username, dataUser.usercccd, categoryValue)
             .send({from: accounts[0]})
             .then((res : any)=>{
                 console.log(res)
@@ -668,7 +686,7 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
         })
         }else if(stepNumberId === 6){
         getProcessingContract().then(async(contract)=>{
-            await contract.methods.addStep7(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, "", dataUser.username, dataUser.usercccd, categoryValue)
+            await contract.methods.addStep7(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, responseImage !== ''? linkImg : '', dataUser.username, dataUser.usercccd, categoryValue)
             .send({from: accounts[0]})
             .then((res : any)=>{
                 console.log(res)
@@ -681,7 +699,7 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
         })
         }else if(stepNumberId === 7){
         getProcessingContract().then(async(contract)=>{
-            await contract.methods.addStep8(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, "", dataUser.username, dataUser.usercccd, categoryValue)
+            await contract.methods.addStep8(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, responseImage !== ''? linkImg : '', dataUser.username, dataUser.usercccd, categoryValue)
             .send({from: accounts[0]})
             .then((res : any)=>{
                 console.log(res)
@@ -725,7 +743,7 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
             {errors.location && <span className="text-red-600 mt-4">*This field is required</span>}
         </div>
         {
-            isUpgrade &&
+            isUpgrade && stepNumberId===0 && productCategory === 'fruit' &&
             <>
                  <div className="w-full flex justify-center gap-4 mt-10">
                     <div className="flex items-center flex-1">

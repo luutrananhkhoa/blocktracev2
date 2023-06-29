@@ -86,7 +86,7 @@ const AddStep: FC<AddStepProps> = () => {
             onSubmit={handleSubmit(onSubmit)}
             className="h-full w-[60%] p-10 rounded-xl mt-10 flex flex-col items-center justify-center shadow-lg bg-white">
             <Toaster />
-            <h2 className="text-3xl font-bold mb-8">Add a Product</h2>
+            <h2 className="text-3xl font-bold mb-8">Add Product</h2>
             <MultiStep stepNumber={Number(stepNumberValue)} />
             <div className="w-full flex flex-col justify-center mt-10">
                 <div className="flex items-center">

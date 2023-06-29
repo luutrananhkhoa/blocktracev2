@@ -45,14 +45,12 @@ const CustomerLogin: FC<CustomerLoginProps> = () => {
       })
       .then((response : any)=>{
         console.log('List user:', response)
-        console.log('addressWallet', addressMetamask)
           let flag = response && response.some((item: { [x: string]: string; }) => {
-              let i : string = item['userAddress'];
-              return i.toLowerCase() === addressMetamask.toLowerCase();
+              let i : string = item['userAddress'];       
+              return i.toLowerCase() === addressMetamask.toLowerCase() && item['userType'] === 'Customer';
           });
           if(!flag){
               toast.error("You don't have an account!")
-
           }else{
               toast.success('Welcome to Block Trace!')
 
@@ -85,14 +83,12 @@ const CustomerLogin: FC<CustomerLoginProps> = () => {
   }
 
    const onSubmit = async (data : any ) => {
-      console.log(data)
       let listUsersData : any= []
       await getUserContract().then( async (contract) =>{
          await contract.methods.getAllUser().call({
            from: addressWallet
          })
          .then((response : any)=>{
-            console.log('List user:', response)
             listUsersData = response
             setListUsers(response)
          })
