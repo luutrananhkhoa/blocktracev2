@@ -33,9 +33,7 @@ const SidebarCustomer: FC<SidebarCustomerProps> = () => {
                     <p className="text-xl">Product</p>
                 </Link>
                 <Link href={'/trackingcustomer'} className={router.includes('/trackingcustomer') ? activeLink : inactiveLink}>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-10 h-10">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M22 13h-8v-2h8v2zm0-6h-8v2h8V7zm-8 10h8v-2h-8v2zm-2-8v6c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V9c0-1.1.9-2 2-2h6c1.1 0 2 .9 2 2zm-1.5 6l-2.25-3l-1.75 2.26l-1.25-1.51L3.5 15h7z"/></svg>
                     <p className="text-xl">Tracking</p>
                 </Link>
                 <Link href={'/customerlogin'} className={inactiveLink}>

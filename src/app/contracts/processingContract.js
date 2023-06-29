@@ -1304,7 +1304,7 @@ export const ABI = [
 		"type": "function"
 	}
 ]
-export const ADDRESS = "0x6728D6Aa0D442aD0d6B7be945F7Eb386Ff9f1b5d";
+export const ADDRESS = "0x8E98386425cDEe51e0103E680D93217842e465E5";
 
 export async function getProcessingContract() {
   const provider = await detectEthereumProvider();
