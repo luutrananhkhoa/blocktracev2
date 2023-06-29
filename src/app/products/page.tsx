@@ -146,7 +146,7 @@ const Products: FC<ProductsProps> = () => {
              <div className="p-6">
                 <div className="flex justify-between">
                     <h1 className="text-4xl font-bold">Product</h1>
-                    {dataUser.userole === '0' || dataUser.usertype === 'Personal' &&
+                    {(dataUser.userole === '0' || dataUser.usertype === 'Personal') &&
                         <Button title="Create" className="btn" onClick={() => router.push('/products/add')}/>
                     }
                 </div>

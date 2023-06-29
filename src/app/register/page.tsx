@@ -238,10 +238,6 @@ const Register: FC<RegisterProps> = () => {
                         </>}
                     </div>
 
-                    <div className="flex items-center gap-2 mt-4">
-                        <input type="checkbox" className="cursor-pointer p-2"/>
-                        <p>I agree to Block Trace&apos;s <span className="font-bold">Term of Service</span> and <span className="font-bold">Privacy Policy</span></p>
-                    </div>
                     <div className="flex flex-col gap-10 w-full mt-[3rem]">
                         <Button className="btn" title="Register" elementType="submit"/>
                     </div>

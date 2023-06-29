@@ -21,7 +21,8 @@ interface DataStep {
     userName: string,
     location: string,
     date: string,
-    categories: string
+    categories: string,
+    photo: string
 }
 
 const BatchDetailCustomer: FC<BatchDetailCustomerProps> = () => {
@@ -36,7 +37,8 @@ const BatchDetailCustomer: FC<BatchDetailCustomerProps> = () => {
         userName: "",
         location: "",
         date: "",
-        categories: ""
+        categories: "",
+        photo: ""
     })
     const [dataStep2, setDataStep2] = useState<DataStep>({
         productName: "",
@@ -44,7 +46,8 @@ const BatchDetailCustomer: FC<BatchDetailCustomerProps> = () => {
         userName: "",
         location: "",
         date: "",
-        categories: ""
+        categories: "",
+        photo: ""
     })
     const [dataStep3, setDataStep3] = useState<DataStep>({
         productName: "",
@@ -52,7 +55,8 @@ const BatchDetailCustomer: FC<BatchDetailCustomerProps> = () => {
         userName: "",
         location: "",
         date: "",
-        categories: ""
+        categories: "",
+        photo: ""
     })
     const [dataStep4, setDataStep4] = useState<DataStep>({
         productName: "",
@@ -60,7 +64,8 @@ const BatchDetailCustomer: FC<BatchDetailCustomerProps> = () => {
         userName: "",
         location: "",
         date: "",
-        categories: ""
+        categories: "",
+        photo: ""
     })
     const [dataStep5, setDataStep5] = useState<DataStep>({
         productName: "",
@@ -68,7 +73,35 @@ const BatchDetailCustomer: FC<BatchDetailCustomerProps> = () => {
         userName: "",
         location: "",
         date: "",
-        categories: ""
+        categories: "",
+        photo: ""
+    })
+    const [dataStep6, setDataStep6] = useState<DataStep>({
+        productName: "",
+        batchId: "",
+        userName: "",
+        location: "",
+        date: "",
+        categories: "",
+        photo: ""
+    })
+    const [dataStep7, setDataStep7] = useState<DataStep>({
+        productName: "",
+        batchId: "",
+        userName: "",
+        location: "",
+        date: "",
+        categories: "",
+        photo: ""
+    })
+    const [dataStep8, setDataStep8] = useState<DataStep>({
+        productName: "",
+        batchId: "",
+        userName: "",
+        location: "",
+        date: "",
+        categories: "",
+        photo: ""
     })
 
 
@@ -110,7 +143,8 @@ const BatchDetailCustomer: FC<BatchDetailCustomerProps> = () => {
                         userName: filteredArrFinal["userName"],
                         location: filteredArrFinal["location"],
                         date: filteredArrFinal["date"],
-                        categories: filteredArrFinal["categories"]
+                        categories: filteredArrFinal["categories"],
+                        photo: filteredArrFinal["photo"]
                     }
                     setDataStep1(item)
                     setStepComplete((prev)=>prev+1)
@@ -134,7 +168,8 @@ const BatchDetailCustomer: FC<BatchDetailCustomerProps> = () => {
                         userName: filteredArrFinal["userName"],
                         location: filteredArrFinal["location"],
                         date: filteredArrFinal["date"],
-                        categories: filteredArrFinal["categories"]
+                        categories: filteredArrFinal["categories"],
+                        photo: filteredArrFinal["photo"]
                     }
                     setDataStep2(item)
                     setStepComplete((prev)=>prev+1)
@@ -158,7 +193,8 @@ const BatchDetailCustomer: FC<BatchDetailCustomerProps> = () => {
                         userName: filteredArrFinal["userName"],
                         location: filteredArrFinal["location"],
                         date: filteredArrFinal["date"],
-                        categories: filteredArrFinal["categories"]
+                        categories: filteredArrFinal["categories"],
+                        photo: filteredArrFinal["photo"]
                     }
                     setDataStep3(item)
                     setStepComplete((prev)=>prev+1)
@@ -182,7 +218,8 @@ const BatchDetailCustomer: FC<BatchDetailCustomerProps> = () => {
                         userName: filteredArrFinal["userName"],
                         location: filteredArrFinal["location"],
                         date: filteredArrFinal["date"],
-                        categories: filteredArrFinal["categories"]
+                        categories: filteredArrFinal["categories"],
+                        photo: filteredArrFinal["photo"]
                     }
                     setDataStep4(item)
                     setStepComplete((prev)=>prev+1)
@@ -206,9 +243,82 @@ const BatchDetailCustomer: FC<BatchDetailCustomerProps> = () => {
                         userName: filteredArrFinal["userName"],
                         location: filteredArrFinal["location"],
                         date: filteredArrFinal["date"],
-                        categories: filteredArrFinal["categories"]
+                        categories: filteredArrFinal["categories"],
+                        photo: filteredArrFinal["photo"]
                     }
                     setDataStep5(item)
+                    setStepComplete((prev)=>prev+1)
+                }
+            })
+            .catch((err : any)=>{console.log(err);})
+          })
+          getProcessingContract().then( async (contract) =>{
+            await contract.methods.getAllStep6().call({
+              from: accounts[0]
+            })
+            .then((response : any)=>{
+                console.log('List step 6:', response)
+                const filteredArr = response.filter((obj : any) => Number(obj["batchId"]) === Number(batchId));
+                const filteredArrFinal = filteredArr[0]
+                if(filteredArrFinal && filteredArrFinal.length > 0){
+                    let item = {
+                        productName: filteredArrFinal["productName"],
+                        batchId: filteredArrFinal["batchId"],
+                        userName: filteredArrFinal["userName"],
+                        location: filteredArrFinal["location"],
+                        date: filteredArrFinal["date"],
+                        categories: filteredArrFinal["categories"],
+                        photo: filteredArrFinal["photo"]
+                    }
+                    setDataStep6(item)
+                    setStepComplete((prev)=>prev+1)
+                }
+            })
+            .catch((err : any)=>{console.log(err);})
+          })
+          getProcessingContract().then( async (contract) =>{
+            await contract.methods.getAllStep7().call({
+              from: accounts[0]
+            })
+            .then((response : any)=>{
+                console.log('List step 7:', response)
+                const filteredArr = response.filter((obj : any) => Number(obj["batchId"]) === Number(batchId));
+                const filteredArrFinal = filteredArr[0]
+                if(filteredArrFinal && filteredArrFinal.length > 0){
+                    let item = {
+                        productName: filteredArrFinal["productName"],
+                        batchId: filteredArrFinal["batchId"],
+                        userName: filteredArrFinal["userName"],
+                        location: filteredArrFinal["location"],
+                        date: filteredArrFinal["date"],
+                        categories: filteredArrFinal["categories"],
+                        photo: filteredArrFinal["photo"]
+                    }
+                    setDataStep7(item)
+                    setStepComplete((prev)=>prev+1)
+                }
+            })
+            .catch((err : any)=>{console.log(err);})
+          })
+          getProcessingContract().then( async (contract) =>{
+            await contract.methods.getAllStep8().call({
+              from: accounts[0]
+            })
+            .then((response : any)=>{
+                console.log('List step 8:', response)
+                const filteredArr = response.filter((obj : any) => Number(obj["batchId"]) === Number(batchId));
+                const filteredArrFinal = filteredArr[0]
+                if(filteredArrFinal && filteredArrFinal.length > 0){
+                    let item = {
+                        productName: filteredArrFinal["productName"],
+                        batchId: filteredArrFinal["batchId"],
+                        userName: filteredArrFinal["userName"],
+                        location: filteredArrFinal["location"],
+                        date: filteredArrFinal["date"],
+                        categories: filteredArrFinal["categories"],
+                        photo: filteredArrFinal["photo"]
+                    }
+                    setDataStep8(item)
                     setStepComplete((prev)=>prev+1)
                 }
             })
@@ -273,6 +383,10 @@ const BatchDetailCustomer: FC<BatchDetailCustomerProps> = () => {
                                     <p className="font-bold text-gray-500">Category</p>
                                     <p>{dataStep1["categories"]}</p>
                                 </div>
+                                <div className="flex justify-between">
+                                    <p className="font-bold text-gray-500">Photo</p>
+                                    <a href={dataStep1["photo"]} target="_blank">{dataStep1["photo"]}</a>
+                                </div>
                             </div>
                         </div>
                     </div>}
@@ -308,6 +422,10 @@ const BatchDetailCustomer: FC<BatchDetailCustomerProps> = () => {
                                     <div className="flex justify-between">
                                         <p className="font-bold text-gray-500">Category</p>
                                         <p>{dataStep2["categories"]}</p>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <p className="font-bold text-gray-500">Photo</p>
+                                        <a href={dataStep2["photo"]} target="_blank">{dataStep2["photo"]}</a>
                                     </div>
                                 </div>
                             </div>
@@ -346,6 +464,10 @@ const BatchDetailCustomer: FC<BatchDetailCustomerProps> = () => {
                                         <p className="font-bold text-gray-500">Category</p>
                                         <p>{dataStep3["categories"]}</p>
                                     </div>
+                                    <div className="flex justify-between">
+                                        <p className="font-bold text-gray-500">Photo</p>
+                                        <a href={dataStep3["photo"]} target="_blank">{dataStep3["photo"]}</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -382,6 +504,10 @@ const BatchDetailCustomer: FC<BatchDetailCustomerProps> = () => {
                                     <div className="flex justify-between">
                                         <p className="font-bold text-gray-500">Category</p>
                                         <p>{dataStep4["categories"]}</p>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <p className="font-bold text-gray-500">Photo</p>
+                                        <a href={dataStep4["photo"]} target="_blank">{dataStep4["photo"]}</a>
                                     </div>
                                 </div>
                             </div>
@@ -420,11 +546,135 @@ const BatchDetailCustomer: FC<BatchDetailCustomerProps> = () => {
                                         <p className="font-bold text-gray-500">Category</p>
                                         <p>{dataStep5["categories"]}</p>
                                     </div>
+                                    <div className="flex justify-between">
+                                        <p className="font-bold text-gray-500">Photo</p>
+                                        <a href={dataStep5["photo"]} target="_blank">{dataStep5["photo"]}</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        }
+                        {dataStep6.productName !== '' &&
+                        <div className="flex gap-4 h-[30vh] w-full">
+                            <div className="h-full flex flex-col">
+                                <div className="px-6 py-4 bg-black text-white rounded-lg">Step 6</div>
+                                <div className="flex-1 h-full text-center mt-4 after:content-[''] after:h-full after:w-1 after:border-l after:border-blue-100 after:border-4 after:inline-block dark:after:border-black"></div>
+                            </div>
+                            <div className="w-ful h-full bg-white flex-1 p-6 rounded-xl">
+                                <div className="flex flex-col gap-6 justify-center">
+                                    <div className="flex justify-between">
+                                        <p className="font-bold text-gray-500">Product Name</p>
+                                        <p>{dataStep6["productName"]}</p>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <p className="font-bold text-gray-500">Product Code</p>
+                                        <p>{dataStep6["batchId"]}</p>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <p className="font-bold text-gray-500">User Name</p>
+                                        <p>{dataStep6["userName"]}</p>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <p className="font-bold text-gray-500">Location</p>
+                                        <p>{dataStep6["location"]}</p>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <p className="font-bold text-gray-500">Date</p>
+                                        <p>{dataStep6["date"]}</p>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <p className="font-bold text-gray-500">Category</p>
+                                        <p>{dataStep6["categories"]}</p>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <p className="font-bold text-gray-500">Photo</p>
+                                        <a href={dataStep6["photo"]} target="_blank">{dataStep6["photo"]}</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     }
-                        
+                    {dataStep7.productName !== '' &&
+                        <div className="flex gap-4 h-[30vh] w-full">
+                            <div className="h-full flex flex-col">
+                                <div className="px-6 py-4 bg-black text-white rounded-lg">Step 7</div>
+                                <div className="flex-1 h-full text-center mt-4 after:content-[''] after:h-full after:w-1 after:border-l after:border-blue-100 after:border-4 after:inline-block dark:after:border-black"></div>
+                            </div>
+                            <div className="w-ful h-full bg-white flex-1 p-6 rounded-xl">
+                                <div className="flex flex-col gap-6 justify-center">
+                                    <div className="flex justify-between">
+                                        <p className="font-bold text-gray-500">Product Name</p>
+                                        <p>{dataStep7["productName"]}</p>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <p className="font-bold text-gray-500">Product Code</p>
+                                        <p>{dataStep7["batchId"]}</p>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <p className="font-bold text-gray-500">User Name</p>
+                                        <p>{dataStep7["userName"]}</p>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <p className="font-bold text-gray-500">Location</p>
+                                        <p>{dataStep7["location"]}</p>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <p className="font-bold text-gray-500">Date</p>
+                                        <p>{dataStep7["date"]}</p>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <p className="font-bold text-gray-500">Category</p>
+                                        <p>{dataStep7["categories"]}</p>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <p className="font-bold text-gray-500">Photo</p>
+                                        <a href={dataStep7["photo"]} target="_blank">{dataStep7["photo"]}</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    {dataStep8.productName !== '' &&
+                        <div className="flex gap-4 h-[30vh] w-full">
+                            <div className="h-full flex flex-col">
+                                <div className="px-6 py-4 bg-black text-white rounded-lg">Step 8</div>
+                                <div className="flex-1 h-full text-center mt-4 after:content-[''] after:h-full after:w-1 after:border-l after:border-blue-100 after:border-4 after:inline-block dark:after:border-black"></div>
+                            </div>
+                            <div className="w-ful h-full bg-white flex-1 p-6 rounded-xl">
+                                <div className="flex flex-col gap-6 justify-center">
+                                    <div className="flex justify-between">
+                                        <p className="font-bold text-gray-500">Product Name</p>
+                                        <p>{dataStep8["productName"]}</p>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <p className="font-bold text-gray-500">Product Code</p>
+                                        <p>{dataStep8["batchId"]}</p>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <p className="font-bold text-gray-500">User Name</p>
+                                        <p>{dataStep8["userName"]}</p>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <p className="font-bold text-gray-500">Location</p>
+                                        <p>{dataStep8["location"]}</p>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <p className="font-bold text-gray-500">Date</p>
+                                        <p>{dataStep8["date"]}</p>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <p className="font-bold text-gray-500">Category</p>
+                                        <p>{dataStep8["categories"]}</p>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <p className="font-bold text-gray-500">Photo</p>
+                                        <a href={dataStep8["photo"]} target="_blank">{dataStep8["photo"]}</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
                     </div>}
                 </div>
             </div>

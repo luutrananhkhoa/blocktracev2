@@ -22,7 +22,6 @@ const Layout: FC<LayoutProps> = ({children}) => {
                         <div className="inline-flex items-center p-2 hover:bg-gray-100 focus:bg-gray-100 rounded-lg">
                             <span className="sr-only">User Menu</span>
                             <div className="hidden md:flex md:flex-col md:items-end md:leading-tight">
-                                <span className="font-semibold">User</span>
                             </div>
                         </div>
                         <div className="border-l pl-3 ml-3 space-x-1">

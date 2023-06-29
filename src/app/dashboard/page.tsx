@@ -1,5 +1,5 @@
 'use client';
-import { FC, useEffect } from "react";
+import { FC, useEffect, useState } from "react";
 import Sidebar from '../components/Sidebar/Sidebar';
 import Layout from "../components/Layout";
 import Button from "../components/Button";
@@ -18,6 +18,8 @@ import {
   } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import Link from "next/link";
+import { getBatchContract } from "../contracts/batchContract";
+import { getUserContract } from "../contracts/userContract";
 
 interface DashboardProps {
     
@@ -35,8 +37,8 @@ ChartJS.register(
 
 const Dashboard: FC<DashboardProps> = () => {
     const user = useSelector((state: any) => state.user.user);
-    console.log('dispatch', user)
-
+    const [countUsers, setCountUsers] = useState(0)
+    const [countProducts, setCountProducts] = useState(0)
     //Chart
     const options = {
         responsive: true,
@@ -74,6 +76,33 @@ const Dashboard: FC<DashboardProps> = () => {
 
     useEffect(()=>{
         toast.success('Welcome!');
+        getBatchContract().then(async (contract) =>  {
+            const accounts = await window.ethereum.request({
+                method: "eth_requestAccounts",
+            });
+            await contract.methods.getAllBatch().call({
+              from: accounts[0]
+            })
+            .then(async(response : any)=>{
+                console.log('Number of product:', response.length);
+                setCountUsers(response.length)
+                })
+            })
+        .catch((err : any)=>{console.log(err);}) 
+        
+        getUserContract().then(async (contract) =>{
+            const accounts = await window.ethereum.request({
+                method: "eth_requestAccounts",
+            });
+            await contract.methods.getAllUser().call({
+              from: accounts[0]
+            })
+            .then((response : any)=>{
+              console.log('Number of users:', response.length);
+              setCountProducts(response.length)
+            })
+            .catch((err : any)=>{console.log(err);})
+          })
     },[])
 
     return ( 
@@ -166,7 +195,7 @@ const Dashboard: FC<DashboardProps> = () => {
                                     </div>
                                     <div>                                        
                                         <span className="block text-gray-500 font-semibold mb-2">Users</span>
-                                        <span className="block text-4xl font-bold text-[#303B5A]">101</span>
+                                        <span className="block text-4xl font-bold text-[#303B5A]">{countUsers? countUsers : "19"}</span>
                                     </div>
                                 </div>
                                 <div className="flex items-center p-8 bg-[#F2FAFF] rounded-lg">
@@ -175,7 +204,7 @@ const Dashboard: FC<DashboardProps> = () => {
                                     </div>
                                     <div>
                                         <span className="block text-gray-500 font-semibold mb-2">Products</span>
-                                        <span className="block text-4xl font-bold text-[#303B5A]">54</span>
+                                        <span className="block text-4xl font-bold text-[#303B5A]">{countProducts? countProducts: "55"}</span>
                                     </div>
                                 </div>
                                 <div className="flex items-center p-8 bg-[#EAFFF8] rounded-lg">
@@ -184,7 +213,7 @@ const Dashboard: FC<DashboardProps> = () => {
                                     </div>
                                     <div>
                                         <span className="block text-gray-500 font-semibold mb-2">Subsystem</span>
-                                        <span className="block text-4xl font-bold text-[#303B5A]">10</span>
+                                        <span className="block text-4xl font-bold text-[#303B5A]">1</span>
                                     </div>
                                 </div>
                             </div>
