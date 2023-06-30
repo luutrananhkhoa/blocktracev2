@@ -465,14 +465,13 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
 
       
     const handleUploadNFT = async () =>{
-
         if(responseImage !== ''){
             const randomCode = generateRandomNumber();
             const url = responseImage
 
             const fileName = randomCode.toString() + url.split("/static/")[1]
 
-            await convertImageToBlob(url, fileName)
+           return await convertImageToBlob(url, fileName)
             .then(async(file) => {
                 // Access the file object here
                 console.log('log file:', file);
@@ -505,7 +504,7 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
                         .catch((error) => console.log(error));
                     })
                     .catch((error) => console.log(error));
-                    
+                    console.log('ipfsImage:', ipfsImage);
                     return ipfsImage
                 }
             })
@@ -513,7 +512,6 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
                 console.error('Error converting image:', error);
             });
         }
-
     }
 
     const handleUpload = async(type:string) => {
@@ -588,7 +586,6 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
               from: accounts[0]
             })
             .then((response : any)=>{ 
-                console.log('response 21: ', response)
                 response.forEach((product : any)=>{
                     if(product["batchId"] === batchId){
                         setProductCategory(product["categories"].toLowerCase()) 
@@ -603,12 +600,13 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
 
     const onSubmit = async (data : any ) => {
         const dataNFT = await handleUploadNFT()
+        console.log('dataNFT', dataNFT)
         const accounts = await window.ethereum.request({
             method: "eth_requestAccounts",
         });
         if(stepNumberId === 0){
             await getProcessingContract().then(async(contract)=>{
-                await contract.methods.addStep1(Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, responseImage !== ''? linkImg : '', dataUser.username, dataUser.usercccd, categoryValue)
+                await contract.methods.addStep1(Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, linkImg !== undefined && linkImg !== ''? linkImg : '', dataUser.username, dataUser.usercccd, categoryValue)
                 .send({from: accounts[0]})
                 .then((res : any)=>{
                     console.log(res)
@@ -621,7 +619,7 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
         })
         }else if(stepNumberId === 1){
         getProcessingContract().then(async (contract)=>{
-            await contract.methods.addStep2(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, responseImage !== ''? linkImg : '', dataUser.username, dataUser.usercccd, categoryValue)
+            await contract.methods.addStep2(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, '', dataUser.username, dataUser.usercccd, categoryValue)
             .send({from: accounts[0]})
             .then((res : any)=>{
                 console.log(res)
@@ -634,7 +632,7 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
         })
         }else if(stepNumberId === 2){
         getProcessingContract().then(async(contract)=>{
-            await contract.methods.addStep3(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, responseImage !== ''? linkImg : '', dataUser.username, dataUser.usercccd, categoryValue)
+            await contract.methods.addStep3(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, '', dataUser.username, dataUser.usercccd, categoryValue)
             .send({from: accounts[0]})
             .then((res : any)=>{
                 console.log(res)
@@ -647,7 +645,7 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
         })
         }else if(stepNumberId === 3){
         getProcessingContract().then(async(contract)=>{
-            await contract.methods.addStep4(0,Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, responseImage !== ''? linkImg : '', dataUser.username, dataUser.usercccd, categoryValue)
+            await contract.methods.addStep4(0,Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, '', dataUser.username, dataUser.usercccd, categoryValue)
             .send({from: accounts[0]})
             .then((res : any)=>{
                 console.log(res)
@@ -660,7 +658,7 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
         })
         }else if(stepNumberId === 4){
         getProcessingContract().then(async(contract)=>{
-            await contract.methods.addStep5(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, responseImage !== ''? linkImg : '', dataUser.username, dataUser.usercccd, categoryValue)
+            await contract.methods.addStep5(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, '', dataUser.username, dataUser.usercccd, categoryValue)
             .send({from: accounts[0]})
             .then((res : any)=>{
                 console.log(res)
@@ -673,7 +671,7 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
         })
         }else if(stepNumberId === 5){
         getProcessingContract().then(async(contract)=>{
-            await contract.methods.addStep6(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, responseImage !== ''? linkImg : '', dataUser.username, dataUser.usercccd, categoryValue)
+            await contract.methods.addStep6(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, '', dataUser.username, dataUser.usercccd, categoryValue)
             .send({from: accounts[0]})
             .then((res : any)=>{
                 console.log(res)
@@ -686,7 +684,7 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
         })
         }else if(stepNumberId === 6){
         getProcessingContract().then(async(contract)=>{
-            await contract.methods.addStep7(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, responseImage !== ''? linkImg : '', dataUser.username, dataUser.usercccd, categoryValue)
+            await contract.methods.addStep7(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, '', dataUser.username, dataUser.usercccd, categoryValue)
             .send({from: accounts[0]})
             .then((res : any)=>{
                 console.log(res)
@@ -699,7 +697,7 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
         })
         }else if(stepNumberId === 7){
         getProcessingContract().then(async(contract)=>{
-            await contract.methods.addStep8(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, responseImage !== ''? linkImg : '', dataUser.username, dataUser.usercccd, categoryValue)
+            await contract.methods.addStep8(0, Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, '', dataUser.username, dataUser.usercccd, categoryValue)
             .send({from: accounts[0]})
             .then((res : any)=>{
                 console.log(res)
