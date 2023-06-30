@@ -600,13 +600,12 @@ const StepForm: FC<StepFormProps> = ({handleHideForm, stepNumberId, categoryValu
 
     const onSubmit = async (data : any ) => {
         const dataNFT = await handleUploadNFT()
-        console.log('dataNFT', dataNFT)
         const accounts = await window.ethereum.request({
             method: "eth_requestAccounts",
         });
         if(stepNumberId === 0){
             await getProcessingContract().then(async(contract)=>{
-                await contract.methods.addStep1(Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, linkImg !== undefined && linkImg !== ''? linkImg : '', dataUser.username, dataUser.usercccd, categoryValue)
+                await contract.methods.addStep1(Number(productCodeValue) , Number(dataUser.userid), Number(dataUser.teamid), batchNameValue, data.date, data.location, dataNFT? dataNFT : '', dataUser.username, dataUser.usercccd, categoryValue)
                 .send({from: accounts[0]})
                 .then((res : any)=>{
                     console.log(res)
