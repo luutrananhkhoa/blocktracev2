@@ -10,6 +10,7 @@ import Button from "@/app/components/Button";
 import { getBatchContract } from "@/app/contracts/batchContract";
 import QRCode from "qrcode.react";
 import SidebarCustomer from "@/app/components/SidebarCustomer";
+import { getUserContract } from "@/app/contracts/userContract";
 
 interface BatchDetailCustomerProps {
     
@@ -31,6 +32,7 @@ const BatchDetailCustomer: FC<BatchDetailCustomerProps> = () => {
     const [BatchIdValue, setBatchIdValue] = useState(0)
     const [numberOfStep, setNumberOfStep] = useState('')
     const [stepComplete, setStepComplete] = useState(0)
+    const [listOwners, setlistOwners] = useState([])
     const [dataStep1, setDataStep1] = useState<DataStep>({
         productName: "",
         batchId: "",
@@ -324,6 +326,27 @@ const BatchDetailCustomer: FC<BatchDetailCustomerProps> = () => {
             })
             .catch((err : any)=>{console.log(err);})
           })
+          
+          getUserContract().then(async (contract) =>  {
+            const accounts = await window.ethereum.request({
+                method: "eth_requestAccounts",
+            });
+            await contract.methods.getAllOwner().call({
+              from: accounts[0]
+            })
+            .then(async(response : any)=>{
+                console.log('List owner1:', response)
+                let listOwner:any = []
+                await response.forEach((item: any)=>{
+                    if(batchId === item["batchId"]){
+                        console.log('item', item)
+                        listOwner.push(item["ownerName"])
+                    }
+                })
+                setlistOwners(listOwner)
+            })
+            .catch((err : any)=>{console.log(err);})
+        })  
     },[])
 
     return ( 
@@ -338,345 +361,360 @@ const BatchDetailCustomer: FC<BatchDetailCustomerProps> = () => {
                     </div>
                     <h1 className="text-2xl font-semibold">Back to Product</h1>
                 </div>
-                <div className="flex flex-col mt-10 justify-center items-center">
+                <div className="flex flex-col mt-12 justify-center items-center">
                     <h1 className="text-6xl font-bold">Tracking</h1>
                     <p className="font-semibold text-gray-600">{numberOfStep} Steps - {stepComplete} Complete</p>
                 </div>
+                {/* {
+                     listOwners.length > 0  &&
+                     <div className="w-full flex justify-center mt-12">
+                        <div className="w-[25%] text-xl flex flex-col justify-center items-center bg-white shadow-xl rounded-xl">
+                            <div className="w-full bg-[#FFD237] flex text-white justify-center p-6 font-bold">Owner</div>
+                            {
+                                listOwners.map((owner) => (
+                                    <div className="w-full text-center text-xl bg-white p-6" key={owner}>
+                                        {owner}
+                                    </div>
+                                ))
+                            }
+                        </div>
+                    </div>
+                } */}
                 <div className="w-full flex items-center justify-center">
-                    {stepComplete === 0?
-                        <div className="w-[60%] p-10 mt-12 flex flex-col items-center gap-4">
-                            <Image src="/noproduct.png" className="w-[60%]" width="800" height="800" alt="Logo" />
-                            <h1 className="font-bold text-[#726BDF] text-5xl">No results found</h1>
-                            <p className="text-2xl">We couldn't find results</p>
-                        </div>
-                        :
-                        <div className="w-[60%] p-10 mt-12 flex flex-col gap-8">
-                        {dataStep1.productName !== '' && 
-                        <div className="flex gap-4 h-[30vh] w-full">
-                        <div className="h-full flex flex-col">
-                            <div className="px-6 py-4 bg-black text-white rounded-lg">Step 1</div>
-                            <div className="flex-1 h-full text-center mt-4 after:content-[''] after:h-full after:w-1 after:border-l after:border-blue-100 after:border-4 after:inline-block dark:after:border-black"></div>
-                        </div>
-                        <div className="w-ful h-full bg-white flex-1 p-6 rounded-xl">
-                            <div className="flex flex-col gap-6 justify-center">
-                                <div className="flex justify-between">
-                                    <p className="font-bold text-gray-500">Product Name</p>
-                                    <p>{dataStep1["productName"]}</p>
-                                </div>
-                                <div className="flex justify-between">
-                                    <p className="font-bold text-gray-500">Product Code</p>
-                                    <p>{dataStep1["batchId"]}</p>
-                                </div>
-                                <div className="flex justify-between">
-                                    <p className="font-bold text-gray-500">User Name</p>
-                                    <p>{dataStep1["userName"]}</p>
-                                </div>
-                                <div className="flex justify-between">
-                                    <p className="font-bold text-gray-500">Location</p>
-                                    <p>{dataStep1["location"]}</p>
-                                </div>
-                                <div className="flex justify-between">
-                                    <p className="font-bold text-gray-500">Date</p>
-                                    <p>{dataStep1["date"]}</p>
-                                </div>
-                                <div className="flex justify-between">
-                                    <p className="font-bold text-gray-500">Category</p>
-                                    <p>{dataStep1["categories"]}</p>
-                                </div>
-                                <div className="flex justify-between">
-                                    <p className="font-bold text-gray-500">Photo</p>
-                                    <a href={dataStep1["photo"]} target="_blank">{dataStep1["photo"]}</a>
-                                </div>
+                        {stepComplete === 0?
+                            <div className="w-[60%] p-10 mt-6 flex flex-col items-center gap-4">
+                                <Image src="/noproduct.png" className="w-[60%]" width="800" height="800" alt="Logo" />
+                                <h1 className="font-bold text-[#726BDF] text-5xl">No results found</h1>
+                                <p className="text-2xl">We couldn't find results</p>
                             </div>
-                        </div>
-                    </div>}
-
-                    {dataStep2.productName !== '' &&
-                        <div className="flex gap-4 h-[30vh] w-full">
+                            :
+                            <div className="w-[60%] p-10 mt-6 flex flex-col gap-8">
+                            {dataStep1.productName !== '' && 
+                            <div className="flex gap-4 h-[30vh] w-full">
                             <div className="h-full flex flex-col">
-                                <div className="px-6 py-4 bg-black text-white rounded-lg">Step 2</div>
+                                <div className="px-6 py-4 bg-black text-white rounded-lg">Step 1</div>
                                 <div className="flex-1 h-full text-center mt-4 after:content-[''] after:h-full after:w-1 after:border-l after:border-blue-100 after:border-4 after:inline-block dark:after:border-black"></div>
                             </div>
                             <div className="w-ful h-full bg-white flex-1 p-6 rounded-xl">
                                 <div className="flex flex-col gap-6 justify-center">
                                     <div className="flex justify-between">
                                         <p className="font-bold text-gray-500">Product Name</p>
-                                        <p>{dataStep2["productName"]}</p>
+                                        <p>{dataStep1["productName"]}</p>
                                     </div>
                                     <div className="flex justify-between">
                                         <p className="font-bold text-gray-500">Product Code</p>
-                                        <p>{dataStep2["batchId"]}</p>
+                                        <p>{dataStep1["batchId"]}</p>
                                     </div>
                                     <div className="flex justify-between">
                                         <p className="font-bold text-gray-500">User Name</p>
-                                        <p>{dataStep2["userName"]}</p>
+                                        <p>{dataStep1["userName"]}</p>
                                     </div>
                                     <div className="flex justify-between">
                                         <p className="font-bold text-gray-500">Location</p>
-                                        <p>{dataStep2["location"]}</p>
+                                        <p>{dataStep1["location"]}</p>
                                     </div>
                                     <div className="flex justify-between">
                                         <p className="font-bold text-gray-500">Date</p>
-                                        <p>{dataStep2["date"]}</p>
+                                        <p>{dataStep1["date"]}</p>
                                     </div>
                                     <div className="flex justify-between">
                                         <p className="font-bold text-gray-500">Category</p>
-                                        <p>{dataStep2["categories"]}</p>
+                                        <p>{dataStep1["categories"]}</p>
                                     </div>
                                     <div className="flex justify-between">
                                         <p className="font-bold text-gray-500">Photo</p>
-                                        <a href={dataStep2["photo"]} target="_blank">{dataStep2["photo"]}</a>
+                                        <a href={dataStep1["photo"]} target="_blank">{dataStep1["photo"]}</a>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    }
+                        </div>}
 
-                    {dataStep3.productName !== '' &&
-                        <div className="flex gap-4 h-[30vh] w-full">
-                            <div className="h-full flex flex-col">
-                                <div className="px-6 py-4 bg-black text-white rounded-lg">Step 3</div>
-                                <div className="flex-1 h-full text-center mt-4 after:content-[''] after:h-full after:w-1 after:border-l after:border-blue-100 after:border-4 after:inline-block dark:after:border-black"></div>
-                            </div>
-                            <div className="w-ful h-full bg-white flex-1 p-6 rounded-xl">
-                                <div className="flex flex-col gap-6 justify-center">
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Product Name</p>
-                                        <p>{dataStep3["productName"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Product Code</p>
-                                        <p>{dataStep3["batchId"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">User Name</p>
-                                        <p>{dataStep3["userName"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Location</p>
-                                        <p>{dataStep3["location"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Date</p>
-                                        <p>{dataStep3["date"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Category</p>
-                                        <p>{dataStep3["categories"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Photo</p>
-                                        <a href={dataStep3["photo"]} target="_blank">{dataStep3["photo"]}</a>
+                        {dataStep2.productName !== '' &&
+                            <div className="flex gap-4 h-[30vh] w-full">
+                                <div className="h-full flex flex-col">
+                                    <div className="px-6 py-4 bg-black text-white rounded-lg">Step 2</div>
+                                    <div className="flex-1 h-full text-center mt-4 after:content-[''] after:h-full after:w-1 after:border-l after:border-blue-100 after:border-4 after:inline-block dark:after:border-black"></div>
+                                </div>
+                                <div className="w-ful h-full bg-white flex-1 p-6 rounded-xl">
+                                    <div className="flex flex-col gap-6 justify-center">
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Product Name</p>
+                                            <p>{dataStep2["productName"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Product Code</p>
+                                            <p>{dataStep2["batchId"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">User Name</p>
+                                            <p>{dataStep2["userName"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Location</p>
+                                            <p>{dataStep2["location"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Date</p>
+                                            <p>{dataStep2["date"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Category</p>
+                                            <p>{dataStep2["categories"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Photo</p>
+                                            <a href={dataStep2["photo"]} target="_blank">{dataStep2["photo"]}</a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    }
-
-                    {dataStep4.productName !== '' &&
-                        <div className="flex gap-4 h-[30vh] w-full">
-                            <div className="h-full flex flex-col">
-                                <div className="px-6 py-4 bg-black text-white rounded-lg">Step 4</div>
-                                <div className="flex-1 h-full text-center mt-4 after:content-[''] after:h-full after:w-1 after:border-l after:border-blue-100 after:border-4 after:inline-block dark:after:border-black"></div>
-                            </div>
-                            <div className="w-ful h-full bg-white flex-1 p-6 rounded-xl">
-                                <div className="flex flex-col gap-6 justify-center">
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Product Name</p>
-                                        <p>{dataStep4["productName"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Product Code</p>
-                                        <p>{dataStep4["batchId"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">User Name</p>
-                                        <p>{dataStep4["userName"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Location</p>
-                                        <p>{dataStep4["location"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Date</p>
-                                        <p>{dataStep4["date"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Category</p>
-                                        <p>{dataStep4["categories"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Photo</p>
-                                        <a href={dataStep4["photo"]} target="_blank">{dataStep4["photo"]}</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    }
-
-                    {dataStep5.productName !== '' &&
-                        <div className="flex gap-4 h-[30vh] w-full">
-                            <div className="h-full flex flex-col">
-                                <div className="px-6 py-4 bg-black text-white rounded-lg">Step 5</div>
-                                <div className="flex-1 h-full text-center mt-4 after:content-[''] after:h-full after:w-1 after:border-l after:border-blue-100 after:border-4 after:inline-block dark:after:border-black"></div>
-                            </div>
-                            <div className="w-ful h-full bg-white flex-1 p-6 rounded-xl">
-                                <div className="flex flex-col gap-6 justify-center">
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Product Name</p>
-                                        <p>{dataStep5["productName"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Product Code</p>
-                                        <p>{dataStep5["batchId"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">User Name</p>
-                                        <p>{dataStep5["userName"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Location</p>
-                                        <p>{dataStep5["location"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Date</p>
-                                        <p>{dataStep5["date"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Category</p>
-                                        <p>{dataStep5["categories"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Photo</p>
-                                        <a href={dataStep5["photo"]} target="_blank">{dataStep5["photo"]}</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                         }
-                        {dataStep6.productName !== '' &&
-                        <div className="flex gap-4 h-[30vh] w-full">
-                            <div className="h-full flex flex-col">
-                                <div className="px-6 py-4 bg-black text-white rounded-lg">Step 6</div>
-                                <div className="flex-1 h-full text-center mt-4 after:content-[''] after:h-full after:w-1 after:border-l after:border-blue-100 after:border-4 after:inline-block dark:after:border-black"></div>
-                            </div>
-                            <div className="w-ful h-full bg-white flex-1 p-6 rounded-xl">
-                                <div className="flex flex-col gap-6 justify-center">
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Product Name</p>
-                                        <p>{dataStep6["productName"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Product Code</p>
-                                        <p>{dataStep6["batchId"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">User Name</p>
-                                        <p>{dataStep6["userName"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Location</p>
-                                        <p>{dataStep6["location"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Date</p>
-                                        <p>{dataStep6["date"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Category</p>
-                                        <p>{dataStep6["categories"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Photo</p>
-                                        <a href={dataStep6["photo"]} target="_blank">{dataStep6["photo"]}</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                    {dataStep7.productName !== '' &&
-                        <div className="flex gap-4 h-[30vh] w-full">
-                            <div className="h-full flex flex-col">
-                                <div className="px-6 py-4 bg-black text-white rounded-lg">Step 7</div>
-                                <div className="flex-1 h-full text-center mt-4 after:content-[''] after:h-full after:w-1 after:border-l after:border-blue-100 after:border-4 after:inline-block dark:after:border-black"></div>
-                            </div>
-                            <div className="w-ful h-full bg-white flex-1 p-6 rounded-xl">
-                                <div className="flex flex-col gap-6 justify-center">
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Product Name</p>
-                                        <p>{dataStep7["productName"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Product Code</p>
-                                        <p>{dataStep7["batchId"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">User Name</p>
-                                        <p>{dataStep7["userName"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Location</p>
-                                        <p>{dataStep7["location"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Date</p>
-                                        <p>{dataStep7["date"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Category</p>
-                                        <p>{dataStep7["categories"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Photo</p>
-                                        <a href={dataStep7["photo"]} target="_blank">{dataStep7["photo"]}</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                    {dataStep8.productName !== '' &&
-                        <div className="flex gap-4 h-[30vh] w-full">
-                            <div className="h-full flex flex-col">
-                                <div className="px-6 py-4 bg-black text-white rounded-lg">Step 8</div>
-                                <div className="flex-1 h-full text-center mt-4 after:content-[''] after:h-full after:w-1 after:border-l after:border-blue-100 after:border-4 after:inline-block dark:after:border-black"></div>
-                            </div>
-                            <div className="w-ful h-full bg-white flex-1 p-6 rounded-xl">
-                                <div className="flex flex-col gap-6 justify-center">
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Product Name</p>
-                                        <p>{dataStep8["productName"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Product Code</p>
-                                        <p>{dataStep8["batchId"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">User Name</p>
-                                        <p>{dataStep8["userName"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Location</p>
-                                        <p>{dataStep8["location"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Date</p>
-                                        <p>{dataStep8["date"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Category</p>
-                                        <p>{dataStep8["categories"]}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p className="font-bold text-gray-500">Photo</p>
-                                        <a href={dataStep8["photo"]} target="_blank">{dataStep8["photo"]}</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    }
 
-                    </div>}
-                </div>
+                        {dataStep3.productName !== '' &&
+                            <div className="flex gap-4 h-[30vh] w-full">
+                                <div className="h-full flex flex-col">
+                                    <div className="px-6 py-4 bg-black text-white rounded-lg">Step 3</div>
+                                    <div className="flex-1 h-full text-center mt-4 after:content-[''] after:h-full after:w-1 after:border-l after:border-blue-100 after:border-4 after:inline-block dark:after:border-black"></div>
+                                </div>
+                                <div className="w-ful h-full bg-white flex-1 p-6 rounded-xl">
+                                    <div className="flex flex-col gap-6 justify-center">
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Product Name</p>
+                                            <p>{dataStep3["productName"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Product Code</p>
+                                            <p>{dataStep3["batchId"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">User Name</p>
+                                            <p>{dataStep3["userName"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Location</p>
+                                            <p>{dataStep3["location"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Date</p>
+                                            <p>{dataStep3["date"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Category</p>
+                                            <p>{dataStep3["categories"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Photo</p>
+                                            <a href={dataStep3["photo"]} target="_blank">{dataStep3["photo"]}</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        {dataStep4.productName !== '' &&
+                            <div className="flex gap-4 h-[30vh] w-full">
+                                <div className="h-full flex flex-col">
+                                    <div className="px-6 py-4 bg-black text-white rounded-lg">Step 4</div>
+                                    <div className="flex-1 h-full text-center mt-4 after:content-[''] after:h-full after:w-1 after:border-l after:border-blue-100 after:border-4 after:inline-block dark:after:border-black"></div>
+                                </div>
+                                <div className="w-ful h-full bg-white flex-1 p-6 rounded-xl">
+                                    <div className="flex flex-col gap-6 justify-center">
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Product Name</p>
+                                            <p>{dataStep4["productName"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Product Code</p>
+                                            <p>{dataStep4["batchId"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">User Name</p>
+                                            <p>{dataStep4["userName"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Location</p>
+                                            <p>{dataStep4["location"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Date</p>
+                                            <p>{dataStep4["date"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Category</p>
+                                            <p>{dataStep4["categories"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Photo</p>
+                                            <a href={dataStep4["photo"]} target="_blank">{dataStep4["photo"]}</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        {dataStep5.productName !== '' &&
+                            <div className="flex gap-4 h-[30vh] w-full">
+                                <div className="h-full flex flex-col">
+                                    <div className="px-6 py-4 bg-black text-white rounded-lg">Step 5</div>
+                                    <div className="flex-1 h-full text-center mt-4 after:content-[''] after:h-full after:w-1 after:border-l after:border-blue-100 after:border-4 after:inline-block dark:after:border-black"></div>
+                                </div>
+                                <div className="w-ful h-full bg-white flex-1 p-6 rounded-xl">
+                                    <div className="flex flex-col gap-6 justify-center">
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Product Name</p>
+                                            <p>{dataStep5["productName"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Product Code</p>
+                                            <p>{dataStep5["batchId"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">User Name</p>
+                                            <p>{dataStep5["userName"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Location</p>
+                                            <p>{dataStep5["location"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Date</p>
+                                            <p>{dataStep5["date"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Category</p>
+                                            <p>{dataStep5["categories"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Photo</p>
+                                            <a href={dataStep5["photo"]} target="_blank">{dataStep5["photo"]}</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            }
+                            {dataStep6.productName !== '' &&
+                            <div className="flex gap-4 h-[30vh] w-full">
+                                <div className="h-full flex flex-col">
+                                    <div className="px-6 py-4 bg-black text-white rounded-lg">Step 6</div>
+                                    <div className="flex-1 h-full text-center mt-4 after:content-[''] after:h-full after:w-1 after:border-l after:border-blue-100 after:border-4 after:inline-block dark:after:border-black"></div>
+                                </div>
+                                <div className="w-ful h-full bg-white flex-1 p-6 rounded-xl">
+                                    <div className="flex flex-col gap-6 justify-center">
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Product Name</p>
+                                            <p>{dataStep6["productName"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Product Code</p>
+                                            <p>{dataStep6["batchId"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">User Name</p>
+                                            <p>{dataStep6["userName"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Location</p>
+                                            <p>{dataStep6["location"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Date</p>
+                                            <p>{dataStep6["date"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Category</p>
+                                            <p>{dataStep6["categories"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Photo</p>
+                                            <a href={dataStep6["photo"]} target="_blank">{dataStep6["photo"]}</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        {dataStep7.productName !== '' &&
+                            <div className="flex gap-4 h-[30vh] w-full">
+                                <div className="h-full flex flex-col">
+                                    <div className="px-6 py-4 bg-black text-white rounded-lg">Step 7</div>
+                                    <div className="flex-1 h-full text-center mt-4 after:content-[''] after:h-full after:w-1 after:border-l after:border-blue-100 after:border-4 after:inline-block dark:after:border-black"></div>
+                                </div>
+                                <div className="w-ful h-full bg-white flex-1 p-6 rounded-xl">
+                                    <div className="flex flex-col gap-6 justify-center">
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Product Name</p>
+                                            <p>{dataStep7["productName"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Product Code</p>
+                                            <p>{dataStep7["batchId"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">User Name</p>
+                                            <p>{dataStep7["userName"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Location</p>
+                                            <p>{dataStep7["location"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Date</p>
+                                            <p>{dataStep7["date"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Category</p>
+                                            <p>{dataStep7["categories"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Photo</p>
+                                            <a href={dataStep7["photo"]} target="_blank">{dataStep7["photo"]}</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        {dataStep8.productName !== '' &&
+                            <div className="flex gap-4 h-[30vh] w-full">
+                                <div className="h-full flex flex-col">
+                                    <div className="px-6 py-4 bg-black text-white rounded-lg">Step 8</div>
+                                    <div className="flex-1 h-full text-center mt-4 after:content-[''] after:h-full after:w-1 after:border-l after:border-blue-100 after:border-4 after:inline-block dark:after:border-black"></div>
+                                </div>
+                                <div className="w-ful h-full bg-white flex-1 p-6 rounded-xl">
+                                    <div className="flex flex-col gap-6 justify-center">
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Product Name</p>
+                                            <p>{dataStep8["productName"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Product Code</p>
+                                            <p>{dataStep8["batchId"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">User Name</p>
+                                            <p>{dataStep8["userName"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Location</p>
+                                            <p>{dataStep8["location"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Date</p>
+                                            <p>{dataStep8["date"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Category</p>
+                                            <p>{dataStep8["categories"]}</p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <p className="font-bold text-gray-500">Photo</p>
+                                            <a href={dataStep8["photo"]} target="_blank">{dataStep8["photo"]}</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        </div>}
+                    </div>  
             </div>
         </div>
 

@@ -9,6 +9,7 @@ import {getProcessingContract as getProcessingContract} from "../../contracts/pr
 import Button from "@/app/components/Button";
 import { getBatchContract } from "@/app/contracts/batchContract";
 import QRCode from "qrcode.react";
+import { getUserContract } from "@/app/contracts/userContract";
 
 interface BatchDetailsProps {
     

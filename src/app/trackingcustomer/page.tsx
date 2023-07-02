@@ -10,6 +10,7 @@ import { getBatchContract } from "@/app/contracts/batchContract";
 import QRCode from "qrcode.react";
 import SidebarCustomer from "@/app/components/SidebarCustomer";
 import { getProcessingContract } from "../contracts/processingContract";
+import { getUserContract } from "../contracts/userContract";
 
 interface TrackingCustomerProps {
     
@@ -33,6 +34,7 @@ const TrackingCustomer: FC<TrackingCustomerProps> = () => {
     const [numberOfStep, setNumberOfStep] = useState('')
     const [inputValue, setInputValue] = useState('')
     const [stepComplete, setStepComplete] = useState(0)
+    const [listOwners, setlistOwners] = useState([])
     const [dataStep1, setDataStep1] = useState<DataStep>({
         productName: "",
         batchId: "",
@@ -334,6 +336,27 @@ const TrackingCustomer: FC<TrackingCustomerProps> = () => {
                 })
                 .catch((err : any)=>{console.log(err);})
                 })
+                
+                getUserContract().then(async (contract) =>  {
+                    const accounts = await window.ethereum.request({
+                        method: "eth_requestAccounts",
+                    });
+                    await contract.methods.getAllOwner().call({
+                      from: accounts[0]
+                    })
+                    .then(async(response : any)=>{
+                        console.log('List owner1:', response)
+                        let listOwner:any = []
+                        await response.forEach((item: any)=>{
+                            if(batchId === item["batchId"]){
+                                listOwner.push(item["ownerName"])
+                            }
+                        })
+                        setlistOwners(listOwner)
+                    })
+                    .catch((err : any)=>{console.log(err);})
+                })  
+
                 setIsShowTracking(true)
             }
         }else{
@@ -359,7 +382,20 @@ const TrackingCustomer: FC<TrackingCustomerProps> = () => {
                                 setInputValue('')
                             }}>Cancel</div>
                         </div>
-                        <div className="w-[60%] p-10 mt-12 flex flex-col gap-8">
+                        {
+                            listOwners.length > 0 &&
+                            <div className="w-full flex justify-center mt-12">
+                                <div className="w-[25%] text-xl flex flex-col justify-center items-center bg-white shadow-xl rounded-xl">
+                                    <div className="w-full bg-[#373B45] flex text-white justify-center p-6 font-bold">Owner</div>
+                                    {listOwners.map((owner) => (
+                                                <div className="w-full text-center text-xl bg-white p-6" key={owner}>
+                                                    {owner}
+                                                </div>
+                                            ))}
+                                </div>
+                            </div>
+                        }
+                        <div className="w-[60%] p-10 mt-10 flex flex-col gap-8">
                             {dataStep1.productName !== '' && 
                             <div className="flex gap-4 h-[30vh] w-full">
                             <div className="h-full flex flex-col">
