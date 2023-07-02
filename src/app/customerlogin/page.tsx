@@ -39,8 +39,8 @@ const CustomerLogin: FC<CustomerLoginProps> = () => {
       method: "eth_requestAccounts",
     });
     addressMetamask = accounts[0]
-    getUserContract().then((contract) =>{
-      contract.methods.getAllUser().call({
+    await getUserContract().then(async(contract) =>{
+      await contract.methods.getAllUser().call({
         from: addressMetamask
       })
       .then((response : any)=>{
