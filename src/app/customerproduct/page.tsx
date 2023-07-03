@@ -34,34 +34,6 @@ const CustomerProduct: FC<CustomerProductProps> = () => {
     const { register, handleSubmit, watch, formState: { errors } } = useForm();
     const [listProduct, setListProduct] = useState<TableProductType[]>([])
 
-    const onHandleConnect = async ()=>{
-      const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      if(accounts){
-         //  console.log(accounts[0])
-          setAddressWallet(accounts[0])
-          let meta = document.getElementById('addressMetamask') as HTMLInputElement
-          if(meta){
-              meta.value = accounts[0]
-          }
-      }
-    }
-
-    const onCheck = () =>{
-      let flag = false
-      listProductsCustomer.map((listProductsCustomer)=>{
-        if(listProductsCustomer["batchId"] === codeValue){
-          flag = true
-        }
-      })
-      if(flag){
-        toast.success("Product is available")
-      }else{
-        toast.error("Product is not available")
-      }
-    }
-
     const [listProductFilter, setListProductFilter] = useState<TableProductType[]>(listProduct)
 
     function filterProductsByKeyword(keyword: string): TableProductType[] {
@@ -91,7 +63,6 @@ const CustomerProduct: FC<CustomerProductProps> = () => {
     }
 
    useEffect(()=>{
-      
     getUserContract().then(async (contract) =>  {
       const accounts = await window.ethereum.request({
           method: "eth_requestAccounts",
@@ -166,7 +137,6 @@ const CustomerProduct: FC<CustomerProductProps> = () => {
                       <div className="px-8 py-4 bg-[#7FEEC4] rounded-r-full font-bold text-[#3F2A8C] cursor-pointer"onClick={onCheck}>Check</div>
                     </div>
                   </div>
-
                 </div> */}
             </div>
         </div>

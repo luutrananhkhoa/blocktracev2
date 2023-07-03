@@ -365,11 +365,11 @@ const BatchDetailCustomer: FC<BatchDetailCustomerProps> = () => {
                     <h1 className="text-6xl font-bold">Tracking</h1>
                     <p className="font-semibold text-gray-600">{numberOfStep} Steps - {stepComplete} Complete</p>
                 </div>
-                {/* {
+                {
                      listOwners.length > 0  &&
                      <div className="w-full flex justify-center mt-12">
                         <div className="w-[25%] text-xl flex flex-col justify-center items-center bg-white shadow-xl rounded-xl">
-                            <div className="w-full bg-[#FFD237] flex text-white justify-center p-6 font-bold">Owner</div>
+                            <div className="w-full bg-[#373B45] flex text-white justify-center p-6 font-bold">Owner</div>
                             {
                                 listOwners.map((owner) => (
                                     <div className="w-full text-center text-xl bg-white p-6" key={owner}>
@@ -379,7 +379,7 @@ const BatchDetailCustomer: FC<BatchDetailCustomerProps> = () => {
                             }
                         </div>
                     </div>
-                } */}
+                }
                 <div className="w-full flex items-center justify-center">
                         {stepComplete === 0?
                             <div className="w-[60%] p-10 mt-6 flex flex-col items-center gap-4">
