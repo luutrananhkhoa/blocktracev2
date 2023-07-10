@@ -4,6 +4,7 @@ import Layout from "../components/Layout";
 import Button from "../components/Button";
 import { useRouter } from 'next/navigation';
 import {getBatchContract as getBatchContract} from "../contracts/batchContract";
+import {getSubSystemContract as getSubSystemContract} from "../contracts/subsystemContract";
 import Link from "next/link";
 
 interface ProductsProps {
@@ -49,6 +50,7 @@ const Products: FC<ProductsProps> = () => {
         usertype: '',
         teamid: ''
     })
+    const [isUpgrade, setIsUpgrade] = useState(false)
     const [listProductFilter, setListProductFilter] = useState<TableProductType[]>(listProduct)
 
     const filterProductsByKeyword = (keyword: string): TableProductType[] => {
@@ -130,16 +132,48 @@ const Products: FC<ProductsProps> = () => {
             })
             .catch((err : any)=>{console.log(err);})
         })  
-       
+        getSubSystemContract().then(async (contract) =>  {
+            const accounts = await window.ethereum.request({
+                method: "eth_requestAccounts",
+            });
+            await contract.methods.getAllSubsystem().call({
+              from: accounts[0]
+            })
+            .then(async(response : any)=>{
+                console.log('response1', response)
+                if(response && response.length > 0){
+                    await response.forEach((item : any)=>{
+                        if(accounts[0].toLowerCase() === item["userAddress"].toLowerCase()){
+                            let now = new Date();
+                            let nowDatetime= now.getTime();
+                            let isLicense = nowDatetime - (Number(item["registerDate"])+ 7 * 24 * 60 * 60 * 1000)>0 ? false : true;
+                            if(isLicense){
+                                setIsUpgrade(true)
+                            }else{
+                                setIsUpgrade(false)
+                            }
+                            console.log('isLicense', isLicense)
+                        }
+                    })
+                }
+            })
+            .catch((err : any)=>{console.log(err);})
+        })  
       },[])
     return ( 
         <Layout>
              <div className="p-6">
                 <div className="flex justify-between">
                     <h1 className="text-4xl font-bold">Product</h1>
-                    {(dataUser.userole === '0' || dataUser.usertype === 'Personal') &&
-                        <Button title="Create" className="btn" onClick={() => router.push('/products/add')}/>
-                    }
+                    <div className="flex gap-2">
+                        {isUpgrade
+                            &&
+                            <div className=" bg-[#e67bea] hover:transition-all hover:bg-[#e777e8] text-white font-bold py-5 px-16 rounded-lg cursor-pointer" onClick={() => router.push('/fruitrecognization')}>Fruit Recognitation</div>
+                        }
+                        {(dataUser.userole === '0' || dataUser.usertype === 'Personal') &&
+                            <Button title="Create" className="btn" onClick={() => router.push('/products/add')}/>
+                        }
+                    </div>
                 </div>
                 <div className="mt-10">
                     <div className="w-full px-6 py-5 flex items-center border-[1px] rounded-lg bg-white mb-10  ">

@@ -5,6 +5,71 @@ export const ABI = [
 	{
 		"inputs": [
 			{
+				"internalType": "address",
+				"name": "step1DatabaseContractAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "step2DatabaseContractAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "step3DatabaseContractAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "step4DatabaseContractAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "step5DatabaseContractAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "step6DatabaseContractAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "step7DatabaseContractAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "step8DatabaseContractAddress",
+				"type": "address"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "previousOwner",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "OwnershipTransferred",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "uint256",
 				"name": "batchId",
 				"type": "uint256"
@@ -507,84 +572,6 @@ export const ABI = [
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "newOwner",
-				"type": "address"
-			}
-		],
-		"name": "transferOwnership",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "step1DatabaseContractAddress",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "step2DatabaseContractAddress",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "step3DatabaseContractAddress",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "step4DatabaseContractAddress",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "step5DatabaseContractAddress",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "step6DatabaseContractAddress",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "step7DatabaseContractAddress",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "step8DatabaseContractAddress",
-				"type": "address"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "constructor"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "previousOwner",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "newOwner",
-				"type": "address"
-			}
-		],
-		"name": "OwnershipTransferred",
-		"type": "event"
 	},
 	{
 		"inputs": [],
@@ -1302,9 +1289,22 @@ export const ABI = [
 		],
 		"stateMutability": "view",
 		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
 	}
 ]
-export const ADDRESS = "0x8E98386425cDEe51e0103E680D93217842e465E5";
+export const ADDRESS = "0xc6eFF7F60b9F47520A9Ce76ef193A364648edd5D";
 
 export async function getProcessingContract() {
   const provider = await detectEthereumProvider();

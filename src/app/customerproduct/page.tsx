@@ -20,7 +20,6 @@ interface TableProductProps {
 interface TableProductType {
   id: number,
   productName: string,
-  ownerName: string,
   dateTime: string,
 }
 
@@ -63,6 +62,38 @@ const CustomerProduct: FC<CustomerProductProps> = () => {
     }
 
    useEffect(()=>{
+    const storedData = localStorage.getItem('customer_data');
+    let dataUser = {
+      dateofbirth: null,
+      useraddress: null,
+      usercccd: null,
+      useremail: null,
+      userid: null,
+      username: null,
+      userole: null,
+      userphone: null,
+      usertype: null,
+      teamid: null
+    }
+    if (storedData) {
+        const parsedData = JSON.parse(storedData);
+        dataUser = parsedData
+    }
+
+    let dataBatch :any = []
+    getBatchContract().then(async (contract) =>  {
+      const accounts = await window.ethereum.request({
+          method: "eth_requestAccounts",
+      });
+      await contract.methods.getAllBatch().call({
+        from: accounts[0]
+      })
+      .then(async(response : any)=>{
+        dataBatch = response
+      })
+      .catch((err : any)=>{console.log(err);})
+    })  
+
     getUserContract().then(async (contract) =>  {
       const accounts = await window.ethereum.request({
           method: "eth_requestAccounts",
@@ -73,14 +104,20 @@ const CustomerProduct: FC<CustomerProductProps> = () => {
       .then((response : any)=>{
           console.log('List owner:', response)
           let arrayList : TableProductType[] = []; 
-          response.map((product : any)=>{
-            let item = {
-              id: Number(product["batchId"]),
-              productName: product["productName"],
-              ownerName: product["ownerName"],
-              dateTime: product["dateTime"],
+          response.forEach((product : any)=>{
+            if(Number(product["customerIds"][0]) === Number(dataUser.userid)){
+              let item = {
+                id: Number(product["batchId"]),
+                productName: "",
+                dateTime: product["dateTime"],
+              }
+              dataBatch.forEach((batch:any)=>{
+                if(Number(batch["batchId"]) === Number(product["batchId"])){
+                  item.productName = batch["batchName"]
+                }
+              })
+              arrayList.push(item)
             }
-            arrayList.push(item)
           })
           setListProduct(arrayList)
           setListProductFilter(arrayList)
@@ -119,15 +156,25 @@ const CustomerProduct: FC<CustomerProductProps> = () => {
                       </svg>
                       <input type="text" className="text-xl border-0 flex-1 outline-none" placeholder="Search" onChange={e=>onChangeFilter(e.target.value)}/>
                     </div>
-                    <Link href={'/customerproduct/add'} className="btn flex items-center gap-4 cursor-pointer">
+                    {/* <Link href={'/customerproduct/add'} className="btn flex items-center gap-4 cursor-pointer">
                       <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 16 16"><path fill="currentColor" fillRule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/></svg>
                       Add Product   
-                    </Link>
+                    </Link> */}
                   </div>
                   <div className="mt-10">
-                        <TableProduct products={listProductFilter} />
+                        { listProduct.length > 0 ?
+                          <TableProduct products={listProductFilter} />
+                        :
+                          <div className="flex w-full flex-col items-center">
+                            <Image src="/noproductcustomer.png" className="w-[30%]" width="800" height="800" alt="Logo" />
+                            <h1 className="font-bold text-4xl mt-4">You don't own any products yet!</h1>
+                          </div>
+                        }
+
                   </div>
-                  <span id="noProductFilter" className="w-full flex justify-center mt-10"></span>
+                  { listProduct.length > 0 &&
+                      <span id="noProductFilter" className="w-full flex justify-center mt-10"></span>
+                  }
                 </div>
                 {/* <div className="p-10 w-[30%] h-[35vh] mt-10 bg-[#3F2A8C] rounded-2xl flex flex-col items-center justify-center">
                   <p className="text-xl font-bold text-white">Add new product</p>

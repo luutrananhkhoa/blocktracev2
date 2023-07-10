@@ -72,6 +72,7 @@ const CustomerLogin: FC<CustomerLoginProps> = () => {
                           usertype: user['userType'], 
                           teamid: user['teamId'], 
                       }
+                      console.log('userData', userData)
                       localStorage.setItem('customer_data', JSON.stringify(userData));
                   }
               })

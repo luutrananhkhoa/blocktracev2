@@ -41,36 +41,98 @@ export const ABI = [
 		"inputs": [
 			{
 				"internalType": "uint256",
+				"name": "productOwnerId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "customerId",
+				"type": "uint256"
+			}
+		],
+		"name": "addCustomerId",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "productOwnerId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "distributorId",
+				"type": "uint256"
+			}
+		],
+		"name": "addDistributorId",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "productOwnerId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "martketId",
+				"type": "uint256"
+			}
+		],
+		"name": "addMartketId",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
 				"name": "batchId",
 				"type": "uint256"
 			},
 			{
-				"internalType": "string",
-				"name": "productName",
-				"type": "string"
+				"internalType": "uint256",
+				"name": "productCode",
+				"type": "uint256"
 			},
 			{
-				"internalType": "string",
-				"name": "ownerName",
-				"type": "string"
+				"internalType": "uint256",
+				"name": "manufacturerId",
+				"type": "uint256"
 			},
 			{
 				"internalType": "string",
 				"name": "dateTime",
 				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "ownerEmail",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "ownerPhoneNumber",
-				"type": "string"
 			}
 		],
 		"name": "addOwner",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "productOwnerId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "staffId",
+				"type": "uint256"
+			}
+		],
+		"name": "addStaffId",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -151,38 +213,48 @@ export const ABI = [
 				"components": [
 					{
 						"internalType": "uint256",
+						"name": "productOwnerId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
 						"name": "batchId",
 						"type": "uint256"
 					},
 					{
-						"internalType": "string",
-						"name": "productName",
-						"type": "string"
+						"internalType": "uint256",
+						"name": "productCode",
+						"type": "uint256"
 					},
 					{
-						"internalType": "string",
-						"name": "ownerName",
-						"type": "string"
+						"internalType": "uint256",
+						"name": "manufacturerId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "distributorIds",
+						"type": "uint256[]"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "martketIds",
+						"type": "uint256[]"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "staffIds",
+						"type": "uint256[]"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "customerIds",
+						"type": "uint256[]"
 					},
 					{
 						"internalType": "string",
 						"name": "dateTime",
 						"type": "string"
-					},
-					{
-						"internalType": "string",
-						"name": "ownerEmail",
-						"type": "string"
-					},
-					{
-						"internalType": "string",
-						"name": "ownerPhoneNumber",
-						"type": "string"
-					},
-					{
-						"internalType": "bool",
-						"name": "ownerIsChecked",
-						"type": "bool"
 					}
 				],
 				"internalType": "struct Product_Owner[]",
@@ -376,7 +448,7 @@ export const ABI = [
 		"type": "function"
 	}
 ]
-export const ADDRESS = "0x7fc3446628f82529368cdC47bf356f05f68120C5";
+export const ADDRESS = "0xe649Fd43242EeB61c83BBC2BAc1e9d4dF2A8C345";
 
 export async function getUserContract() {
   const provider = await detectEthereumProvider();

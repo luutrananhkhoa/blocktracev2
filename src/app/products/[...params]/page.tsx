@@ -13,6 +13,8 @@ import { getBatchContract } from "@/app/contracts/batchContract";
 import { getSubSystemContract } from "@/app/contracts/subsystemContract";
 import { NFTStorage, File } from "nft.storage";
 import axios from 'axios';
+import AddOwner from "@/app/components/AddOwner";
+import { getUserContract } from "@/app/contracts/userContract";
 
 interface ProductDetailProps {
     
@@ -23,6 +25,12 @@ interface StepProcessProps {
     handleHide: () => void,
     setStepNumberId: (id: number) => void
 }
+interface OwnerStepProps {
+    stepName: string,
+    setIsShowFormOwner: (value: boolean) => void
+    setNameStepOwner: (value: string)=> void,
+    status: string
+}
 
 interface StepFormProps {
     handleHideForm: () => void,
@@ -32,11 +40,24 @@ interface StepFormProps {
     isUpgrade: boolean
 }
 
+interface DataStepOwner {
+    productOwnerId: number,
+    batchId: number,
+    productCode: number,
+    manufacturerId: number,
+    distributorIds: number[],
+    martketIds: number[],
+    staffIds: number[],
+    customerIds: number[],
+    dateTime: string
+}
+
 const ProductDetail: FC<ProductDetailProps> = () => {
     const router = useRouter();
     const params = useParams();
     const [stepNumberValue, setStepNumberValue] = useState(0)
     const [isShowForm, setIsShowForm] = useState(false)
+    const [isShowFormOwner, setIsShowFormOwner] = useState(false)
     const [fileType, setFileType] = useState('')
     const [fileName, setFileName] = useState('')
     const [stepNumberId, setStepNumberId] = useState(1)
@@ -46,7 +67,7 @@ const ProductDetail: FC<ProductDetailProps> = () => {
     const [isUpgrade, setIsUpgrade] = useState(false)
     const [timeValidPremium, setTimeValidPremium] = useState(0)
     const [isShowUpgrade, setIsShowUpgrade] = useState(false)
-
+    const [nameStepOwner, setNameStepOwner] = useState('')
     const [isRole, setIsRole] = useState('')
 
     const [selectedFile, setSelectedFile] = useState(null);
@@ -99,7 +120,18 @@ const ProductDetail: FC<ProductDetailProps> = () => {
             });
         }
     }
-    
+    const [dataStepOwner, setDataStepOwner] = useState<DataStepOwner>({
+        productOwnerId: 0,
+        batchId: 0,
+        productCode: 0,
+        manufacturerId: 0,
+        distributorIds: [],
+        martketIds: [],
+        staffIds: [],
+        customerIds: [],
+        dateTime: ''
+    })
+
     useEffect(()=>{
         let batchId = params.params.split('/')[0];
         let stepNumber = params.params.split('/')[1];
@@ -196,6 +228,35 @@ const ProductDetail: FC<ProductDetailProps> = () => {
             })
             .catch((err : any)=>{console.log(err);})
         }) 
+
+        getUserContract().then(async(contract)=>{
+            const accounts = await window.ethereum.request({
+              method: "eth_requestAccounts",
+            });
+            await  contract.methods.getAllOwner().call({
+                from: accounts[0]
+            })
+            .then((res : any)=>{
+                console.log(res)
+                res.forEach((item:any)=>{
+                    if(item["batchId"] === batchId){
+                        let dataFinal = {
+                            productOwnerId: item["productOwnerId"],
+                            batchId: item["batchId"],
+                            productCode: item["productCode"],
+                            manufacturerId: item["manufacturerId"],
+                            distributorIds: item["distributorIds"],
+                            martketIds: item["martketIds"],
+                            staffIds: item["staffIds"],
+                            customerIds: item["customerIds"],
+                            dateTime: item["dateTime"]
+                        }
+                        setDataStepOwner(dataFinal)
+                    }
+                })
+
+            }).catch((err : any)=>{console.log(err)})
+        })
     },[])
 
     const handleHideForm = () =>{
@@ -251,6 +312,7 @@ const ProductDetail: FC<ProductDetailProps> = () => {
                             </div>
 
                         :
+                        !isShowFormOwner &&
                         <div className="w-full">
                             <div className="flex p-6 gap-10 justify-start flex-wrap">
                                 {   (isArrayShow.length > Number(isRole)) 
@@ -368,10 +430,72 @@ const ProductDetail: FC<ProductDetailProps> = () => {
 
                                     ) 
                                 }
+                                {
+                                    isArrayShow.every((element) => element === true)?
+                                        (
+                                            dataStepOwner.manufacturerId !== 0 ?
+                                            <OwnerStep stepName={"Manufacturer"} setIsShowFormOwner={setIsShowFormOwner} setNameStepOwner={setNameStepOwner} status="done"/>
+                                            :
+                                            <OwnerStep stepName={"Manufacturer"} setIsShowFormOwner={setIsShowFormOwner} setNameStepOwner={setNameStepOwner} status="available"/>
+                                        )
+                                    :    
+                                    <OwnerStep stepName={"Manufacturer"} setIsShowFormOwner={setIsShowFormOwner} setNameStepOwner={setNameStepOwner} status="disable"/>
+                                }
+                                {
+                                     dataStepOwner.manufacturerId !== 0 ?
+                                        (
+                                            dataStepOwner.distributorIds.length > 0 ?
+                                            <OwnerStep stepName={"Distributor"} setIsShowFormOwner={setIsShowFormOwner} setNameStepOwner={setNameStepOwner} status="done"/>
+                                            :
+                                            <OwnerStep stepName={"Distributor"} setIsShowFormOwner={setIsShowFormOwner} setNameStepOwner={setNameStepOwner} status="available"/>
+                                        )
+                                     :
+                                    <OwnerStep stepName={"Distributor"} setIsShowFormOwner={setIsShowFormOwner} setNameStepOwner={setNameStepOwner} status="disable"/>
+                                     
+                                }
+                                {
+                                     dataStepOwner.distributorIds.length > 0 ?
+                                        (
+                                            dataStepOwner.martketIds.length > 0 ?
+                                            <OwnerStep stepName={"Retailer"} setIsShowFormOwner={setIsShowFormOwner} setNameStepOwner={setNameStepOwner} status="done"/>
+                                            :
+                                            <OwnerStep stepName={"Retailer"} setIsShowFormOwner={setIsShowFormOwner} setNameStepOwner={setNameStepOwner} status="available"/>
+                                        )
+                                     :
+                                    <OwnerStep stepName={"Retailer"} setIsShowFormOwner={setIsShowFormOwner} setNameStepOwner={setNameStepOwner} status="disable"/>
+                                     
+                                }
+                                {
+                                     dataStepOwner.martketIds.length > 0 ?
+                                        (
+                                            dataStepOwner.staffIds.length > 0 ?
+                                            <OwnerStep stepName={"Staff"} setIsShowFormOwner={setIsShowFormOwner} setNameStepOwner={setNameStepOwner} status="done"/>
+                                            :
+                                            <OwnerStep stepName={"Staff"} setIsShowFormOwner={setIsShowFormOwner} setNameStepOwner={setNameStepOwner} status="available"/>
+                                        )
+                                     :
+                                    <OwnerStep stepName={"Staff"} setIsShowFormOwner={setIsShowFormOwner} setNameStepOwner={setNameStepOwner} status="disable"/>
+                                     
+                                }
+                                {
+                                     dataStepOwner.staffIds.length > 0 ?
+                                        (
+                                            dataStepOwner.customerIds.length > 0 ?
+                                            <OwnerStep stepName={"Customer"} setIsShowFormOwner={setIsShowFormOwner} setNameStepOwner={setNameStepOwner} status="done"/>
+                                            :
+                                            <OwnerStep stepName={"Customer"} setIsShowFormOwner={setIsShowFormOwner} setNameStepOwner={setNameStepOwner} status="available"/>
+                                        )
+                                     :
+                                    <OwnerStep stepName={"Customer"} setIsShowFormOwner={setIsShowFormOwner} setNameStepOwner={setNameStepOwner} status="disable"/>
+                                     
+                                }
                             </div>
                         </div>
                         }
-
+                        {
+                            isShowFormOwner && !isShowForm &&
+                                <AddOwner setIsShowFormOwner={setIsShowFormOwner} StepName={nameStepOwner}/>
+                        }
                     </div>
                 </div>
                     
@@ -803,3 +927,53 @@ function generateRandomNumber() {
     return result;
   }
   
+  const OwnerStep: FC<OwnerStepProps> = ({stepName, setIsShowFormOwner, setNameStepOwner, status}) =>{
+
+    const handleClickAdd = ()=>{
+        setIsShowFormOwner(true)
+        setNameStepOwner(stepName)
+    }
+    if(status=== "available"){
+        return(
+            <div  className="min-h-[450px] w-[20%] rounded-xl mt-10 bg-[#FFD66A] flex flex-col items-center justify-center hover:scale-110">
+                <div className="w-full h-full px-6 py-10 bg-[#FFD66A] flex items-center justify-between flex-col rounded-xl">
+                    <h2 className="text-4xl font-bold text-white">Step</h2>
+                    <p className="text-3xl font-bold text-white">{stepName}</p>
+                    <div className="w-full">
+                        <div className="px-6 py-4 bg-[white] rounded-xl flex justify-center text-xl font-bold text-black cursor-pointer" 
+                        onClick={()=>handleClickAdd()}
+                        >Add</div>
+                    </div>
+                </div>
+            </div>
+        )
+    }else if(status==="disable"){
+        return(
+            <div  className="min-h-[450px] w-[20%] rounded-xl mt-10 bg-[#FE6A78] flex flex-col items-center justify-center">
+                <div className="w-full h-full px-6 py-10 bg-[#FE6A78] flex items-center justify-between flex-col rounded-xl">
+                    <h2 className="text-4xl font-bold text-white">Step</h2>
+                    <p className="text-3xl font-bold text-white">{stepName}</p>
+                    <div className="w-full">
+                        <div className="px-6 py-4 bg-[white] rounded-xl flex justify-center text-xl font-bold text-black cursor-pointer" 
+                        >Disable</div>
+                    </div>
+                </div>
+            </div>
+        )
+    }else if(status === "done"){
+        return(
+            <div  className="min-h-[450px] w-[20%] rounded-xl mt-10 bg-[#5FCCA0] flex flex-col items-center justify-center">
+                <div className="w-full h-full px-6 py-10 bg-[#5FCCA0] flex items-center justify-between flex-col rounded-xl">
+                    <h2 className="text-4xl font-bold text-white">Step</h2>
+                    <p className="text-3xl font-bold text-white">{stepName}</p>
+                    <div className="w-full">
+                        <div className="px-6 py-4 bg-[white] rounded-xl flex justify-center text-xl font-bold text-black cursor-pointer" 
+                        >Disable</div>
+                    </div>
+                </div>
+            </div>
+        )
+    }else{
+        return(<></>)
+    }
+  }

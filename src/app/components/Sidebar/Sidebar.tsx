@@ -3,7 +3,7 @@ import Link from "next/link";
 import { FC, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-
+import {getSubSystemContract as getSubSystemContract} from "../../contracts/subsystemContract";
 interface SidebarProps {
     
 }
@@ -13,7 +13,7 @@ const Sidebar: FC<SidebarProps> = () => {
     const inactiveLink = 'flex items-center gap-2 p-2';
     const activeLink = inactiveLink+ ' bg-[#726BDF] text-white p-3 rounded-lg';
     const router = usePathname();
-
+    // const [isUpgrade, setIsUpgrade] = useState(false)
     
     useEffect(()=>{
         const storedData = localStorage.getItem('user_data');
@@ -25,6 +25,33 @@ const Sidebar: FC<SidebarProps> = () => {
             }
             // setTeamIdValue(parsedData.teamid)
         }
+        // getSubSystemContract().then(async (contract) =>  {
+        //     const accounts = await window.ethereum.request({
+        //         method: "eth_requestAccounts",
+        //     });
+        //     await contract.methods.getAllSubsystem().call({
+        //       from: accounts[0]
+        //     })
+        //     .then(async(response : any)=>{
+        //         console.log('response1', response)
+        //         if(response && response.length > 0){
+        //             await response.forEach((item : any)=>{
+        //                 if(accounts[0].toLowerCase() === item["userAddress"].toLowerCase()){
+        //                     let now = new Date();
+        //                     let nowDatetime= now.getTime();
+        //                     let isLicense = nowDatetime - (Number(item["registerDate"])+ 7 * 24 * 60 * 60 * 1000)>0 ? false : true;
+        //                     if(isLicense){
+        //                         setIsUpgrade(true)
+        //                     }else{
+        //                         setIsUpgrade(false)
+        //                     }
+        //                     console.log('isLicense', isLicense)
+        //                 }
+        //             })
+        //         }
+        //     })
+        //     .catch((err : any)=>{console.log(err);})
+        // })  
     },[])
 
     return ( 
@@ -59,6 +86,14 @@ const Sidebar: FC<SidebarProps> = () => {
                     </svg>
                     <p className="text-xl">Report</p>
                 </Link> */}
+                {/* {
+                    isUpgrade &&
+                    <Link href={'/fruitrecognization'} className={router.includes('/fruitrecognization') ? activeLink : inactiveLink}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" className="w-10 h-10" viewBox="0 0 256 256"><g fill="currentColor"><path d="M216 48v32a8 8 0 0 1-8 8h-32a8 8 0 0 1-8-8V48a8 8 0 0 1 8-8h32a8 8 0 0 1 8 8ZM80 40H48a8 8 0 0 0-8 8v32a8 8 0 0 0 8 8h32a8 8 0 0 0 8-8V48a8 8 0 0 0-8-8Zm128 128h-32a8 8 0 0 0-8 8v32a8 8 0 0 0 8 8h32a8 8 0 0 0 8-8v-32a8 8 0 0 0-8-8Zm-128 0H48a8 8 0 0 0-8 8v32a8 8 0 0 0 8 8h32a8 8 0 0 0 8-8v-32a8 8 0 0 0-8-8Z" opacity=".2"/><path d="M208 96a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16h-32a16 16 0 0 0-16 16v8H96v-8a16 16 0 0 0-16-16H48a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h8v64h-8a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h32a16 16 0 0 0 16-16v-8h64v8a16 16 0 0 0 16 16h32a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16h-8V96Zm-32-48h32v32h-32ZM48 48h32v15.9a.51.51 0 0 0 0 .2V80H48Zm32 160H48v-32h32v15.9a.51.51 0 0 0 0 .2V208Zm128 0h-32v-32h32Zm-24-48h-8a16 16 0 0 0-16 16v8H96v-8a16 16 0 0 0-16-16h-8V96h8a16 16 0 0 0 16-16v-8h64v8a16 16 0 0 0 16 16h8Z"/></g></svg>
+                        <p className="text-xl">Fruit Recognition</p>
+                    </Link>
+
+                } */}
                 <Link href={'/tracking'} className={router.includes('/tracking') ? activeLink : inactiveLink}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="32"  className="w-10 h-10" height="32" viewBox="0 0 256 256"><path fill="currentColor" d="M88 72a8 8 0 0 1 8-8h64a8 8 0 0 1 0 16H96a8 8 0 0 1-8-8Zm8 40h64a8 8 0 0 0 0-16H96a8 8 0 0 0 0 16Zm112-72v176a16 16 0 0 1-16 16H64a16 16 0 0 1-16-16V40a16 16 0 0 1 16-16h128a16 16 0 0 1 16 16Zm-16 0H64v176h128Zm-64 128a12 12 0 1 0 12 12a12 12 0 0 0-12-12Z"/></svg>
                     <p className="text-xl">Product Tracking</p>
